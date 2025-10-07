@@ -1,0 +1,14 @@
+#pragma once
+
+enum {
+    ITEM_EFFECT_MOVE,
+    ITEM_EFFCT_HEAL,
+    ITEM_EFFECT_COUNT
+};
+
+enum {
+    ITEM_NONE,
+    ITEM_THROWING_KNIFE,
+    ITEM_BOMB,
+    ITEM_COUNT
+};
