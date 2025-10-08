@@ -11,10 +11,12 @@
 #include <raylib.h>
 #include <stdio.h>
 
-#define BATTLE_TEXT_BOX (Rectangle){80, VIRTUAL_HEIGHT * 3/4, 160, VIRTUAL_HEIGHT * 1/4}
+#define BATTLE_TEXT_BOX (Rectangle){60, VIRTUAL_HEIGHT * 3/4, 200, VIRTUAL_HEIGHT * 1/4}
+#define state data[0]
 
 void CB_HandleBattle();
 static void DrawBattleInterface();
+static void Task_EncounterText(int taskId);
 static void Task_StartBattle(int taskId);
 void Task_ActionSelection(int taskId);
 static void Task_OpponentPlaysMove(int taskId);
@@ -39,7 +41,7 @@ void CB_InitBattle() {
         .HP = gMonstersInfo[MONSTER_WOLF].HP
     };
 
-    CreateTask(Task_StartBattle, 0);
+    CreateTask(Task_EncounterText, 0);
 
     gMainCallback = CB_HandleBattle;
 }
@@ -83,6 +85,26 @@ static void DrawBattleInterface() {
 #undef PLAYER_HEALTHBOX
 #undef OPPONENT_HEALTHBOX
 
+static void Task_EncounterText(int taskId) {
+    char buffer[32];
+
+    switch (gTasks[taskId].state) {
+    case 0:
+        sprintf(buffer, "A %s appeared!", gBattleOpponent.info->name);
+        AddTextPrinterDefault(buffer, BATTLE_TEXT_BOX, 4);
+        gTasks[taskId].state++;
+        break;
+    case 1:
+        if (IsKeyPressed(KEY_Z) || IsKeyPressed(KEY_X)) {
+            CreateTask(Task_StartBattle, 0);
+            DestroyTask(taskId);
+        }
+        break;
+    default:
+        break;
+    }
+}
+
 static void Task_StartBattle(int taskId) {
     if (gBattlePlayer.speed > gBattleOpponent.info->speed) {
         gTasks[taskId].func = Task_ActionSelection;
@@ -96,19 +118,19 @@ static void Task_StartBattle(int taskId) {
     }
 }
 
-#define ACTION_SELECTION_BOX (Rectangle){80, VIRTUAL_HEIGHT * 3/4, 160, VIRTUAL_HEIGHT * 1/4}
-#define state data[0]
 #define cursor data[1]
 
 void Task_ActionSelection(int taskId) {
     switch (gTasks[taskId].state) {
     case 0:
-        AddTextPrinterDefault("ITEM\nFLEE", ACTION_SELECTION_BOX, 0);
+        AddTextPrinterDefault("ITEM\nFLEE", BATTLE_TEXT_BOX, 0);
         gTasks[taskId].state++;
         break;
     case 1:
         if (IsKeyPressed(KEY_X)) {
             if (gTasks[taskId].cursor == 0) {
+                if (!ItemCount()) return;
+
                 CreateTask(Task_OpenBag, 0);
                 DestroyTask(taskId);
             } else {
@@ -125,12 +147,11 @@ void Task_ActionSelection(int taskId) {
             if (++gTasks[taskId].cursor > 1)
                 gTasks[taskId].cursor = 1;
 
-        DrawText(">", 80 - 4, gTasks[taskId].cursor == 0 ? VIRTUAL_HEIGHT * 3/4 + 4 : VIRTUAL_HEIGHT * 3/4 + 19, 8, BLACK);
+        DrawText(">", 60 - 4, gTasks[taskId].cursor == 0 ? VIRTUAL_HEIGHT * 3/4 + 4 : VIRTUAL_HEIGHT * 3/4 + 19, 8, BLACK);
         break;
     }
 }
 
-#undef ACTION_SELECTION_BOX
 #undef cursor
 
 static void Task_OpponentPlaysMove(int taskId) {
@@ -149,7 +170,7 @@ static void Task_OpponentPlaysMove(int taskId) {
 #define move data[2]
 
 void Task_PlayMove(int taskId) {
-    char buffer[64];
+    char buffer[32];
 
     switch (gTasks[taskId].state)
     {
@@ -161,7 +182,7 @@ void Task_PlayMove(int taskId) {
                 gBattleOpponent.HP -= gMovesInfo[gTasks[taskId].move].damage;
                 if (gBattleOpponent.HP < 0)
                     gBattleOpponent.HP = 0;
-                sprintf(buffer, "Player used %s", gMovesInfo[gTasks[taskId].move].name);
+                sprintf(buffer, "You used %s", gMovesInfo[gTasks[taskId].move].name);
             } else {
                 gBattlePlayer.HP -= gMovesInfo[gTasks[taskId].move].damage;
                 if (gBattlePlayer.HP < 0)
@@ -210,7 +231,7 @@ static void Task_Victory(int taskId) {
     switch (gTasks[taskId].state) {
     case 0:
         sprintf(buffer, "You defeated %s", gBattleOpponent.info->name);
-        AddTextPrinterDefault(buffer, BATTLE_TEXT_BOX, 0);
+        AddTextPrinterDefault(buffer, BATTLE_TEXT_BOX, 4);
         gTasks[taskId].state++;
         break;
     default:
@@ -221,7 +242,7 @@ static void Task_Victory(int taskId) {
 static void Task_Defeat(int taskId) {
     switch (gTasks[taskId].state) {
     case 0:
-        AddTextPrinterDefault("You were defeated", BATTLE_TEXT_BOX, 0);
+        AddTextPrinterDefault("You were defeated", BATTLE_TEXT_BOX, 4);
         gTasks[taskId].state++;
         break;
     default:
@@ -232,13 +253,11 @@ static void Task_Defeat(int taskId) {
 static void Task_Flee(int taskId) {
     switch (gTasks[taskId].state) {
     case 0:
-        AddTextPrinterDefault("You ran away", BATTLE_TEXT_BOX, 0);
+        AddTextPrinterDefault("You ran away", BATTLE_TEXT_BOX, 4);
         gTasks[taskId].state++;
         break;
     default:
         break;
     }
 }
-
-#undef state
 
