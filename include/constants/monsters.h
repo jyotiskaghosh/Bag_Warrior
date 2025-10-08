@@ -2,6 +2,6 @@
 
 enum {
     MONSTER_NONE,
-    MONSTER_VRKA,
+    MONSTER_WOLF,
     MONSER_COUNT
 };

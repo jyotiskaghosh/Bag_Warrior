@@ -1,5 +1,7 @@
 #pragma once
 
+#define BAG_CAPACITY 40
+
 typedef struct {
     char description[128];
     char name[16];
@@ -7,4 +9,6 @@ typedef struct {
     int move;
 } Item;
 
-extern int gBag[50];
+extern int gBag[BAG_CAPACITY];
+
+void Task_OpenBag();

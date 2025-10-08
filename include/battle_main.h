@@ -41,3 +41,6 @@ extern BattleMonster gBattleOpponent;
 extern BattlePlayer gBattlePlayer;
 
 void CB_InitBattle();
+void CB_HandleBattle();
+void Task_ActionSelection(int taskId);
+void Task_PlayMove(int taskId);
