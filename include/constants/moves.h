@@ -1,4 +1,4 @@
-#pragma onec
+#pragma once
 
 #define ELEMENT_EARTH (1 << 0)
 #define ELEMENT_WATER (1 << 1)
