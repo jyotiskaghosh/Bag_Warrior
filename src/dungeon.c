@@ -1,5 +1,6 @@
 #include "dungeon.h"
 
+#include "core/task.h"
 #include <raylib.h>
 #include <stdlib.h>
 
@@ -27,26 +28,34 @@ static struct RoomNode {
 };
 
 /*
- * Coordinate data type
+ * Coordinates data type
  */
 typedef struct {
     int x;
     int y;
-} coord;
+} Coordinates;
+
+enum {
+    TILE_EMPTY,
+    TILE_FLOOR
+};
 
 static void CB_HandleDungeon();
 static int RandomRoom();
+static Coordinates RandomPos(Room *r);
 static void CarveRoom(Room r);
 static void ConnectRooms(int r1, int r2);
 
-int gMap[MAP_H][MAP_W];
+static int sMap[MAP_H][MAP_W];
 static Room sRooms[MAX_ROOMS];
+static Coordinates sPlayerPos;
+static Camera2D sCamera;
 
 // Fill map with walls
-void ClearMap(void) {
+static void ClearMap(void) {
     for (int y = 0; y < MAP_H; y++)
         for (int x = 0; x < MAP_W; x++)
-            gMap[y][x] = TILE_EMPTY;
+            sMap[y][x] = TILE_EMPTY;
 }
 
 static void GenerateRooms() {
@@ -90,11 +99,19 @@ static int RandomRoom() {
     return n;
 } 
 
+static Coordinates RandomPos(Room *r) {
+    Coordinates c = {
+        r->x + GetRandomValue(0, r->w - 3) + 1,
+        r->y + GetRandomValue(0, r->h - 3) + 1
+    };
+    return c;
+}
+
 // Carve room floor
 static void CarveRoom(Room r) {
     for (int y = r.y; y < r.y + r.h; y++) {
         for (int x = r.x; x < r.x + r.w; x++) {
-            gMap[y][x] = TILE_FLOOR;
+            sMap[y][x] = TILE_FLOOR;
         }
     }
 }
@@ -155,7 +172,7 @@ static void ConnectRooms(int r1, int r2) {
     int distance = 0, turn_spot, turn_distance = 0;
     int rm, rmt;
     char direc;
-    static coord del, curr, turn_delta, spos, epos;
+    static Coordinates del, curr, turn_delta, spos, epos;
     
     if (r1 < r2) {
         rm = r1;
@@ -226,8 +243,8 @@ static void ConnectRooms(int r1, int r2) {
 
     turn_spot = GetRandomValue(0, distance - 2) + 1; // where turn starts
 
-    gMap[spos.y][spos.x] = TILE_FLOOR;
-    gMap[epos.y][epos.x] = TILE_FLOOR;
+    sMap[spos.y][spos.x] = TILE_FLOOR;
+    sMap[epos.y][epos.x] = TILE_FLOOR;
 
     // get ready to move...
     curr.x = spos.x;
@@ -241,30 +258,88 @@ static void ConnectRooms(int r1, int r2) {
         // check if we are at the turn place, if so we the turn
         if (distance == turn_spot) {
             while (turn_distance--) {
-                gMap[curr.y][curr.x] = TILE_FLOOR;
+                sMap[curr.y][curr.x] = TILE_FLOOR;
                 curr.x += turn_delta.x;
 	        	curr.y += turn_delta.y;
             }
         }
-        gMap[curr.y][curr.x] = TILE_FLOOR;
+        sMap[curr.y][curr.x] = TILE_FLOOR;
         distance--;
     }
 }
 
+static Coordinates FindFloor() {
+    Room *r = &sRooms[RandomRoom()];
+    return RandomPos(r);
+}
+
 static void DrawMap() {
     for (int y = 0; y < MAP_H; y++)
-        for (int x = 0; x < MAP_W; x++)
-            DrawText(gMap[y][x] == TILE_FLOOR ? "." : "#", x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, BLACK);
+        for (int x = 0; x < MAP_W; x++) {
+            switch (sMap[y][x])
+            {
+            case TILE_EMPTY:
+                DrawText(" ", x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, WHITE);
+                break;
+            case TILE_FLOOR:
+                DrawText(".", x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, WHITE);
+                break;
+            default:
+                break;
+            }
+        }
+}
+
+static void DrawCameraView() {
+    sCamera.target = (Vector2){sPlayerPos.x * TILE_SIZE, sPlayerPos.y * TILE_SIZE};
+    sCamera.offset = (Vector2){ VIRTUAL_WIDTH / 2, VIRTUAL_HEIGHT / 2};  // screen center (half screen width/height)
+    sCamera.rotation = 0.0f;
+    sCamera.zoom = 1.0f;
+
+    BeginMode2D(sCamera);
+        DrawMap();
+        DrawText("@", sPlayerPos.x * TILE_SIZE, sPlayerPos.y * TILE_SIZE, TILE_SIZE, WHITE);
+    EndMode2D();
+}
+
+static void Task_HandleOverworld(int taskId) {
+    if (IsKeyPressed(KEY_UP)) {
+        if (sPlayerPos.y - 1 >= 0 && sMap[sPlayerPos.y - 1][sPlayerPos.x] == TILE_FLOOR) {
+            sPlayerPos.y--;
+        }
+    }
+
+    if (IsKeyPressed(KEY_DOWN)) {
+        if (sPlayerPos.y + 1 < MAP_H && sMap[sPlayerPos.y + 1][sPlayerPos.x] == TILE_FLOOR) {
+            sPlayerPos.y++;
+        }
+    } 
+
+    if (IsKeyPressed(KEY_LEFT)) {
+        if (sPlayerPos.x - 1 >= 0 && sMap[sPlayerPos.y][sPlayerPos.x - 1] == TILE_FLOOR) {
+            sPlayerPos.x--;
+        }
+    }
+
+    if (IsKeyPressed(KEY_RIGHT)) {
+        if (sPlayerPos.x + 1 < MAP_W && sMap[sPlayerPos.y][sPlayerPos.x + 1] == TILE_FLOOR) {
+            sPlayerPos.x++;
+        }
+    }
 }
 
 void CB_LoadDungeon() {
     ClearMap();
     GenerateRooms();
     GeneratePassages();
+
+    sPlayerPos = FindFloor();
     
     gMainCallback = CB_HandleDungeon;
+    CreateTask(Task_HandleOverworld, 0);
 }
 
 static void CB_HandleDungeon() {
-    DrawMap();
+    DrawCameraView();
+    RunTasks();
 }

@@ -19,7 +19,7 @@ int main() {
 
 	while (!WindowShouldClose()) {
 		BeginTextureMode(virtualScreen);
-			ClearBackground(WHITE);
+			ClearBackground(BLACK);
 			gMainCallback();
 		EndTextureMode();
 

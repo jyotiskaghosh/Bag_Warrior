@@ -6,6 +6,6 @@
 #define WINDOW_WIDTH 1280
 #define WINDOW_HEIGHT 720
 
-#define TILE_SIZE 5
+#define TILE_SIZE 16
 
 extern void (*gMainCallback)(void);

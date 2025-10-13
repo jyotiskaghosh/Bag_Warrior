@@ -8,11 +8,4 @@
 #define ROOM_ROWS 3
 #define ROOM_COLS 3
 
-enum {
-    TILE_EMPTY,
-    TILE_FLOOR
-};
-
-extern int gMap[MAP_H][MAP_W];
-
 void CB_LoadDungeon();

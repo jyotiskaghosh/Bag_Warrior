@@ -63,8 +63,8 @@ static void DrawBattleInterface() {
 
     char buffer[16];
 
-    DrawRectangleRec(PLAYER_HEALTHBOX, GRAY);
-    DrawRectangleLinesEx(PLAYER_HEALTHBOX, 1, BLACK);
+    DrawRectangleRec(PLAYER_HEALTHBOX, BLACK);
+    DrawRectangleLinesEx(PLAYER_HEALTHBOX, 1, WHITE);
 
     DrawText("PLAYER", PLAYER_HEALTHBOX.x + 4, PLAYER_HEALTHBOX.y + 4, 8, WHITE);
     sprintf(buffer, "HP: %d / %d", HP, maxHP);
@@ -74,8 +74,8 @@ static void DrawBattleInterface() {
     maxHP = gBattleOpponent.info->HP;
     HP = gBattleOpponent.HP;
 
-    DrawRectangleRec(OPPONENT_HEALTHBOX, GRAY);
-    DrawRectangleLinesEx(OPPONENT_HEALTHBOX, 1, BLACK);
+    DrawRectangleRec(OPPONENT_HEALTHBOX, BLACK);
+    DrawRectangleLinesEx(OPPONENT_HEALTHBOX, 1, WHITE);
 
     DrawText(gBattleOpponent.info->name, OPPONENT_HEALTHBOX.x + 4, OPPONENT_HEALTHBOX.y + 4, 8, WHITE);
     sprintf(buffer, "HP: %d / %d", HP, maxHP);
@@ -147,7 +147,7 @@ void Task_ActionSelection(int taskId) {
             if (++gTasks[taskId].cursor > 1)
                 gTasks[taskId].cursor = 1;
 
-        DrawText(">", 60 - 4, gTasks[taskId].cursor == 0 ? VIRTUAL_HEIGHT * 3/4 + 4 : VIRTUAL_HEIGHT * 3/4 + 19, 8, BLACK);
+        DrawText(">", 60 - 4, gTasks[taskId].cursor == 0 ? VIRTUAL_HEIGHT * 3/4 + 4 : VIRTUAL_HEIGHT * 3/4 + 19, 8, WHITE);
         break;
     }
 }

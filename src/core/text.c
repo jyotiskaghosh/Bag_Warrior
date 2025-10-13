@@ -82,8 +82,8 @@ void AddTextPrinterDefault(const char * str, Rectangle box, int framesPerChar) {
         .padding = 4,
         .font = FONT_DEFAULT,
         .fontSize = 8,
-        .bgColor = GRAY,
-        .frameColor = BLACK,
+        .bgColor = BLACK,
+        .frameColor = WHITE,
         .textColor = WHITE
     };
 

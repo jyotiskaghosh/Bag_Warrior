@@ -58,7 +58,6 @@ static void CB_HandleBag() {
 }
 
 static void DrawBag() {
-    DrawRectangle(0, 0, VIRTUAL_WIDTH, VIRTUAL_HEIGHT, BLACK);
     DrawText("BAG", 4, 4, 16, WHITE);
     DrawLine(0, 24, VIRTUAL_WIDTH, 24, WHITE);
     for (int i = 0; i < 10; i++)
