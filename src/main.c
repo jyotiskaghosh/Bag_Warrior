@@ -1,8 +1,7 @@
 #include <raylib.h>
 #include "main.h"
 #include "core/music.h"
-#include "battle_main.h"
-#include "dungeon.h"
+#include "start_screen.h"
 
 void (*gMainCallback)(void);
 
@@ -13,7 +12,7 @@ int main() {
 
 	RenderTexture2D virtualScreen = LoadRenderTexture(VIRTUAL_WIDTH, VIRTUAL_HEIGHT);
 
-	gMainCallback = CB_NewLevel;
+	gMainCallback = CB_InitStartScreen;
 
 	SetTargetFPS(60);
 

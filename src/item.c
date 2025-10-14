@@ -17,7 +17,7 @@ static void CB_HandleBag();
 static void DrawBag();
 static void Task_ItemSelection(int taskId);
 
-int gBag[BAG_CAPACITY] = {ITEM_THROWING_KNIFE, ITEM_THROWING_KNIFE, ITEM_THROWING_KNIFE};
+int gBag[BAG_CAPACITY];
 
 static int sItemSelectionCursor;
 static int sPage;

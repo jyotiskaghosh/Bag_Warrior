@@ -9,6 +9,7 @@
 #include "core/sprite.h"
 #include "item.h"
 #include "dungeon.h"
+#include "end_screen.h"
 #include <raylib.h>
 #include <stdio.h>
 
@@ -27,15 +28,12 @@ static void Task_Defeat(int taskId);
 static void Task_Flee(int taskId);
 
 bool gInBattle;
-BattlePlayer gBattlePlayer = {
-    .HP = 10,
-    .maxHP = 10,
-    .speed = 5
-};
-
+BattlePlayer gBattlePlayer;
 BattleMonster gBattleOpponent;
 
 void CB_InitBattle() {
+    gInBattle = true;
+
     gBattleOpponent = (BattleMonster){
         .info = &gMonstersInfo[MONSTER_WOLF],
         .HP = gMonstersInfo[MONSTER_WOLF].HP
@@ -236,8 +234,8 @@ static void Task_Victory(int taskId) {
         break;
     case 1:
         if (IsKeyPressed(KEY_Z) || IsKeyPressed(KEY_X)) {
-            CreateTask(Task_LoadDungeon, 0);
             DestroyTask(taskId);
+            gMainCallback = CB_LoadDungeon;
         }
         break;
     default:
@@ -250,6 +248,12 @@ static void Task_Defeat(int taskId) {
     case 0:
         AddTextPrinterDefault("You were defeated", BATTLE_TEXT_BOX, 4);
         gTasks[taskId].state++;
+        break;
+    case 1:
+        if (IsKeyPressed(KEY_Z) || IsKeyPressed(KEY_X)) {
+            DestroyTask(taskId);
+            gMainCallback = CB_InitEndScreen;
+        }
         break;
     default:
         break;
@@ -264,8 +268,8 @@ static void Task_Flee(int taskId) {
         break;
     case 1:
         if (IsKeyPressed(KEY_Z) || IsKeyPressed(KEY_X)) {
-            CreateTask(Task_LoadDungeon, 0);
             DestroyTask(taskId);
+            gMainCallback = CB_LoadDungeon;
         }
         break;
     default:

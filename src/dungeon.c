@@ -359,9 +359,9 @@ void CB_NewLevel() {
     CreateTask(Task_HandleOverworld, 0);
 }
 
-void Task_LoadDungeon(int taskId) {
+void CB_LoadDungeon() {
     StopAllTextPrinters();
-    gTasks[taskId].func = Task_HandleOverworld;
+    CreateTask(Task_HandleOverworld, 0);
     gMainCallback = CB_HandleDungeon;
 }
 
