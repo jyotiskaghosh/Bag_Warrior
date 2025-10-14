@@ -8,4 +8,5 @@
 #define ROOM_ROWS 3
 #define ROOM_COLS 3
 
-void CB_LoadDungeon();
+void CB_NewLevel();
+void Task_LoadDungeon(int taskId);

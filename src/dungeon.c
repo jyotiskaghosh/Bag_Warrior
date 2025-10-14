@@ -1,10 +1,14 @@
 #include "dungeon.h"
 
 #include "core/task.h"
+#include "battle_main.h"
+#include "core/text.h"
 #include <raylib.h>
 #include <stdlib.h>
 
 #define MAX_ROOMS ROOM_ROWS * ROOM_COLS
+
+#define ENCOUNTER_RATE 10
 
 typedef struct {
     int x, y, w, h; // position and size
@@ -306,29 +310,45 @@ static void Task_HandleOverworld(int taskId) {
     if (IsKeyPressed(KEY_UP)) {
         if (sPlayerPos.y - 1 >= 0 && sMap[sPlayerPos.y - 1][sPlayerPos.x] == TILE_FLOOR) {
             sPlayerPos.y--;
+
+            goto encounter;
         }
     }
 
     if (IsKeyPressed(KEY_DOWN)) {
         if (sPlayerPos.y + 1 < MAP_H && sMap[sPlayerPos.y + 1][sPlayerPos.x] == TILE_FLOOR) {
             sPlayerPos.y++;
+
+            goto encounter;
         }
     } 
 
     if (IsKeyPressed(KEY_LEFT)) {
         if (sPlayerPos.x - 1 >= 0 && sMap[sPlayerPos.y][sPlayerPos.x - 1] == TILE_FLOOR) {
             sPlayerPos.x--;
+
+            goto encounter;
         }
     }
 
     if (IsKeyPressed(KEY_RIGHT)) {
         if (sPlayerPos.x + 1 < MAP_W && sMap[sPlayerPos.y][sPlayerPos.x + 1] == TILE_FLOOR) {
             sPlayerPos.x++;
+
+            goto encounter;
         }
     }
+
+    return;
+
+    encounter:
+        if (GetRandomValue(0, 100) < ENCOUNTER_RATE) {
+            DestroyTask(taskId);
+            gMainCallback = CB_InitBattle;
+        }
 }
 
-void CB_LoadDungeon() {
+void CB_NewLevel() {
     ClearMap();
     GenerateRooms();
     GeneratePassages();
@@ -337,6 +357,12 @@ void CB_LoadDungeon() {
     
     gMainCallback = CB_HandleDungeon;
     CreateTask(Task_HandleOverworld, 0);
+}
+
+void Task_LoadDungeon(int taskId) {
+    StopAllTextPrinters();
+    gTasks[taskId].func = Task_HandleOverworld;
+    gMainCallback = CB_HandleDungeon;
 }
 
 static void CB_HandleDungeon() {

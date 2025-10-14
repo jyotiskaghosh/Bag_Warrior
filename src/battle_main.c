@@ -8,6 +8,7 @@
 #include "core/task.h"
 #include "core/sprite.h"
 #include "item.h"
+#include "dungeon.h"
 #include <raylib.h>
 #include <stdio.h>
 
@@ -26,16 +27,15 @@ static void Task_Defeat(int taskId);
 static void Task_Flee(int taskId);
 
 bool gInBattle;
-BattlePlayer gBattlePlayer;
+BattlePlayer gBattlePlayer = {
+    .HP = 10,
+    .maxHP = 10,
+    .speed = 5
+};
+
 BattleMonster gBattleOpponent;
 
 void CB_InitBattle() {
-    gBattlePlayer = (BattlePlayer){
-        .HP = 10,
-        .maxHP = 10,
-        .speed = 5
-    }; 
-
     gBattleOpponent = (BattleMonster){
         .info = &gMonstersInfo[MONSTER_WOLF],
         .HP = gMonstersInfo[MONSTER_WOLF].HP
@@ -170,13 +170,12 @@ static void Task_OpponentPlaysMove(int taskId) {
 #define move data[2]
 
 void Task_PlayMove(int taskId) {
-    char buffer[32];
+    char buffer[37];
 
     switch (gTasks[taskId].state)
     {
     case 0:
-        switch (gMovesInfo[gTasks[taskId].move].effect)
-        {
+        switch (gMovesInfo[gTasks[taskId].move].effect) {
         case EFFECT_HIT:
             if (gTasks[taskId].user == PLAYER) {
                 gBattleOpponent.HP -= gMovesInfo[gTasks[taskId].move].damage;
@@ -196,6 +195,7 @@ void Task_PlayMove(int taskId) {
         default:
             break;
         }
+        break;
     case 1:
         if (IsKeyPressed(KEY_X) || IsKeyPressed(KEY_Z)) {
             if (gBattleOpponent.HP <= 0) {
@@ -222,8 +222,8 @@ void Task_PlayMove(int taskId) {
     }
 }
 
-#define user
-#define move
+#undef user
+#undef move
 
 static void Task_Victory(int taskId) {
     char buffer[32];    
@@ -233,6 +233,12 @@ static void Task_Victory(int taskId) {
         sprintf(buffer, "You defeated %s", gBattleOpponent.info->name);
         AddTextPrinterDefault(buffer, BATTLE_TEXT_BOX, 4);
         gTasks[taskId].state++;
+        break;
+    case 1:
+        if (IsKeyPressed(KEY_Z) || IsKeyPressed(KEY_X)) {
+            CreateTask(Task_LoadDungeon, 0);
+            DestroyTask(taskId);
+        }
         break;
     default:
         break;
@@ -255,6 +261,12 @@ static void Task_Flee(int taskId) {
     case 0:
         AddTextPrinterDefault("You ran away", BATTLE_TEXT_BOX, 4);
         gTasks[taskId].state++;
+        break;
+    case 1:
+        if (IsKeyPressed(KEY_Z) || IsKeyPressed(KEY_X)) {
+            CreateTask(Task_LoadDungeon, 0);
+            DestroyTask(taskId);
+        }
         break;
     default:
         break;

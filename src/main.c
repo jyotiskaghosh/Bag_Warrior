@@ -13,7 +13,7 @@ int main() {
 
 	RenderTexture2D virtualScreen = LoadRenderTexture(VIRTUAL_WIDTH, VIRTUAL_HEIGHT);
 
-	gMainCallback = CB_LoadDungeon;
+	gMainCallback = CB_NewLevel;
 
 	SetTargetFPS(60);
 
