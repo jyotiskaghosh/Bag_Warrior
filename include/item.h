@@ -11,5 +11,5 @@ typedef struct {
 
 extern int gBag[BAG_CAPACITY];
 
-void Task_OpenBag(int taskId);
+void CB_OpenBag();
 int ItemCount();

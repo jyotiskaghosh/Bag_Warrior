@@ -2,6 +2,7 @@
 
 #include "main.h"
 #include "battle_main.h"
+#include "dungeon.h"
 #include "data.h"
 #include "constants/item.h"
 #include "core/task.h"
@@ -44,11 +45,11 @@ static void RemoveItem(int index) {
     }
 }
 
-void Task_OpenBag(int taskId) {
+void CB_OpenBag() {
     StopAllTextPrinters();
     sItemSelectionCursor = 0;
-    gTasks[taskId].func = Task_ItemSelection;
     gMainCallback = CB_HandleBag;
+    CreateTask(Task_ItemSelection, 0);
 }
 
 static void CB_HandleBag() {
@@ -69,18 +70,37 @@ static void DrawBag() {
 
 static void Task_ItemSelection(int taskId) {
     if (IsKeyPressed(KEY_X)) {
-        gMainCallback = CB_HandleBattle;
-        gTasks[taskId].func = Task_PlayMove;
-        gTasks[taskId].data[1] = PLAYER;
-        gTasks[taskId].data[2] = gItemsInfo[gBag[sItemSelectionCursor + sPage * ITEMS_PER_PAGE]].move;
+        Item item = gItemsInfo[gBag[sItemSelectionCursor + sPage * ITEMS_PER_PAGE]];
+
+        if (gInBattle) {
+            gMainCallback = CB_HandleBattle;
+            gTasks[taskId].func = Task_PlayMove;
+            gTasks[taskId].data[1] = PLAYER;
+            gTasks[taskId].data[2] = item.move;
+        } else {
+            switch (item.effect) {
+            case ITEM_EFFCT_HEAL:
+                gBattlePlayer.HP -= gMovesInfo[item.move].damage;
+                if (gBattlePlayer.HP > gBattlePlayer.maxHP)
+                    gBattlePlayer.HP = gBattlePlayer.maxHP;
+                break;
+            default:
+                return;
+            }
+        }
 
         // remove the item
         RemoveItem(sItemSelectionCursor + sPage * ITEMS_PER_PAGE);
     }
 
     if (IsKeyPressed(KEY_Z)) {
-        CreateTask(Task_ActionSelection, 0);
-        gMainCallback = CB_HandleBattle;
+        if (gInBattle) {
+            CreateTask(Task_ActionSelection, 0);
+            gMainCallback = CB_HandleBattle;
+        } else {
+            gMainCallback = CB_LoadDungeon;
+        }
+        
         DestroyTask(taskId);
     }
 

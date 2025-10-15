@@ -128,8 +128,7 @@ void Task_ActionSelection(int taskId) {
         if (IsKeyPressed(KEY_X)) {
             if (gTasks[taskId].cursor == 0) {
                 if (!ItemCount()) return;
-
-                CreateTask(Task_OpenBag, 0);
+                gMainCallback = CB_OpenBag;
                 DestroyTask(taskId);
             } else {
                 CreateTask(Task_Flee, 0);
@@ -168,7 +167,7 @@ static void Task_OpponentPlaysMove(int taskId) {
 #define move data[2]
 
 void Task_PlayMove(int taskId) {
-    char buffer[37];
+    char buffer[64];
 
     switch (gTasks[taskId].state)
     {
@@ -185,6 +184,22 @@ void Task_PlayMove(int taskId) {
                 if (gBattlePlayer.HP < 0)
                     gBattlePlayer.HP = 0;
                 sprintf(buffer, "%s used %s", gBattleOpponent.info->name, gMovesInfo[gTasks[taskId].move].name);
+            }
+
+            AddTextPrinterDefault(buffer, BATTLE_TEXT_BOX, 4);
+            gTasks[taskId].state++;
+            break;
+        case EFFECT_HEAL:
+            if (gTasks[taskId].user == PLAYER) {
+                gBattlePlayer.HP -= gMovesInfo[gTasks[taskId].move].damage;
+                if (gBattlePlayer.HP > gBattlePlayer.maxHP)
+                    gBattlePlayer.HP = gBattlePlayer.maxHP;
+                sprintf(buffer, "You used %s\nHealed %d HP", gMovesInfo[gTasks[taskId].move].name, -gMovesInfo[gTasks[taskId].move].damage);
+            } else {
+                gBattleOpponent.HP -= gMovesInfo[gTasks[taskId].move].damage;
+                if (gBattleOpponent.HP > gBattleOpponent.info->HP)
+                    gBattleOpponent.HP = gBattleOpponent.info->HP; 
+                sprintf(buffer, "%s used %s\nHealed %d HP", gBattleOpponent.info->name, gMovesInfo[gTasks[taskId].move].name, -gMovesInfo[gTasks[taskId].move].damage);
             }
 
             AddTextPrinterDefault(buffer, BATTLE_TEXT_BOX, 4);
@@ -231,6 +246,7 @@ static void Task_Victory(int taskId) {
         sprintf(buffer, "You defeated %s", gBattleOpponent.info->name);
         AddTextPrinterDefault(buffer, BATTLE_TEXT_BOX, 4);
         gTasks[taskId].state++;
+        gInBattle = false;
         break;
     case 1:
         if (IsKeyPressed(KEY_Z) || IsKeyPressed(KEY_X)) {
@@ -248,6 +264,7 @@ static void Task_Defeat(int taskId) {
     case 0:
         AddTextPrinterDefault("You were defeated", BATTLE_TEXT_BOX, 4);
         gTasks[taskId].state++;
+        gInBattle = false;
         break;
     case 1:
         if (IsKeyPressed(KEY_Z) || IsKeyPressed(KEY_X)) {
@@ -265,6 +282,7 @@ static void Task_Flee(int taskId) {
     case 0:
         AddTextPrinterDefault("You ran away", BATTLE_TEXT_BOX, 4);
         gTasks[taskId].state++;
+        gInBattle = false;
         break;
     case 1:
         if (IsKeyPressed(KEY_Z) || IsKeyPressed(KEY_X)) {

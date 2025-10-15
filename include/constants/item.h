@@ -10,5 +10,6 @@ enum {
     ITEM_NONE,
     ITEM_THROWING_KNIFE,
     ITEM_BOMB,
+    ITEM_POTION,
     ITEM_COUNT
 };

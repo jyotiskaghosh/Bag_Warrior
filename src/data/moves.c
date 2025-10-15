@@ -15,5 +15,12 @@ const Move gMovesInfo[] = {
         .damage = 3,
         .accuracy = 90,
         .flags = 0
+    },
+    [MOVE_HEAL] = {
+        .name = "HEAL",
+        .effect = EFFECT_HEAL,
+        .damage = -5,
+        .accuracy = 100,
+        .flags = 0
     }
 };

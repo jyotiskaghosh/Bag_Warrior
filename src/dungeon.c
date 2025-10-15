@@ -2,13 +2,15 @@
 
 #include "core/task.h"
 #include "battle_main.h"
+#include "item.h"
 #include "core/text.h"
 #include <raylib.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 #define MAX_ROOMS ROOM_ROWS * ROOM_COLS
 
-#define ENCOUNTER_RATE 10
+#define ENCOUNTER_RATE 5
 
 typedef struct {
     int x, y, w, h; // position and size
@@ -294,7 +296,11 @@ static void DrawMap() {
         }
 }
 
+#define HP_BOX (Rectangle){0, 0, 80, 16}
+
 static void DrawCameraView() {
+    char buffer[16];
+
     sCamera.target = (Vector2){sPlayerPos.x * TILE_SIZE, sPlayerPos.y * TILE_SIZE};
     sCamera.offset = (Vector2){ VIRTUAL_WIDTH / 2, VIRTUAL_HEIGHT / 2};  // screen center (half screen width/height)
     sCamera.rotation = 0.0f;
@@ -304,7 +310,14 @@ static void DrawCameraView() {
         DrawMap();
         DrawText("@", sPlayerPos.x * TILE_SIZE, sPlayerPos.y * TILE_SIZE, TILE_SIZE, WHITE);
     EndMode2D();
+
+    DrawRectangleRec(HP_BOX, BLACK);
+    DrawRectangleLinesEx(HP_BOX, 1, WHITE);
+    sprintf(buffer, "HP: %d / %d", gBattlePlayer.HP, gBattlePlayer.maxHP);
+    DrawText(buffer, 4, 4, 8, WHITE);
 }
+
+#undef HP_BOX
 
 static void Task_HandleOverworld(int taskId) {
     if (IsKeyPressed(KEY_UP)) {
@@ -337,6 +350,11 @@ static void Task_HandleOverworld(int taskId) {
 
             goto encounter;
         }
+    }
+
+    if (IsKeyPressed(KEY_S)) {
+        DestroyTask(taskId);
+        gMainCallback = CB_OpenBag;
     }
 
     return;

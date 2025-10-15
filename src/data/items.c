@@ -8,5 +8,11 @@ const Item gItemsInfo[] = {
         .effect = ITEM_EFFECT_MOVE,
         .move = MOVE_THROWING_KNIFE,
         .description = "Throw knife to do damage."
+    },
+    [ITEM_POTION] = {
+        .name = "POTION",
+        .effect = ITEM_EFFCT_HEAL,
+        .move = MOVE_HEAL,
+        .description = "Recover health."
     }
 };

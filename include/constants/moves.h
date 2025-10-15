@@ -7,6 +7,7 @@
 
 enum {
     EFFECT_HIT,
+    EFFECT_HEAL,
     MOVE_EFFECT_COUNT
 };
 
@@ -14,5 +15,6 @@ enum {
     MOVE_NONE,
     MOVE_BITE,
     MOVE_THROWING_KNIFE,
+    MOVE_HEAL,
     MOVE_COUNT
 };
