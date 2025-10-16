@@ -7,20 +7,16 @@ const Move gMovesInfo[] = {
         .effect = EFFECT_HIT,
         .damage = 3,
         .accuracy = 90,
-        .flags = 0
     },
     [MOVE_THROWING_KNIFE] = {
         .name = "THROW KNIFE",
         .effect = EFFECT_HIT,
         .damage = 3,
-        .accuracy = 90,
-        .flags = 0
+        .accuracy = 100,
     },
     [MOVE_HEAL] = {
         .name = "HEAL",
         .effect = EFFECT_HEAL,
         .damage = -5,
-        .accuracy = 100,
-        .flags = 0
     }
 };

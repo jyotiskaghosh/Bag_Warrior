@@ -11,12 +11,15 @@
 
 #define ITEMS_PER_PAGE 10
 #define DESCRIPTION_BOX (Rectangle){VIRTUAL_WIDTH / 2, 28, VIRTUAL_WIDTH / 2, VIRTUAL_HEIGHT / 2}
+#define CONFIRMATION_BOX (Rectangle){VIRTUAL_WIDTH - 80, VIRTUAL_HEIGHT - 48, 80, 48}
 
 int ItemCount();
 static void RemoveItem(int index);
 static void CB_HandleBag();
 static void DrawBag();
 static void Task_ItemSelection(int taskId);
+static void Task_InitItemCofirmation(int taskId);
+static void Task_ItemConfirmation(int taskId);
 
 int gBag[BAG_CAPACITY];
 
@@ -70,27 +73,21 @@ static void DrawBag() {
 
 static void Task_ItemSelection(int taskId) {
     if (IsKeyPressed(KEY_X)) {
-        Item item = gItemsInfo[gBag[sItemSelectionCursor + sPage * ITEMS_PER_PAGE]];
-
         if (gInBattle) {
             gMainCallback = CB_HandleBattle;
             gTasks[taskId].func = Task_PlayMove;
             gTasks[taskId].data[1] = PLAYER;
-            gTasks[taskId].data[2] = item.move;
-        } else {
-            switch (item.effect) {
-            case ITEM_EFFCT_HEAL:
-                gBattlePlayer.HP -= gMovesInfo[item.move].damage;
-                if (gBattlePlayer.HP > gBattlePlayer.maxHP)
-                    gBattlePlayer.HP = gBattlePlayer.maxHP;
-                break;
-            default:
-                return;
-            }
-        }
+            gTasks[taskId].data[2] = gItemsInfo[gBag[sItemSelectionCursor + sPage * ITEMS_PER_PAGE]].move;
 
-        // remove the item
-        RemoveItem(sItemSelectionCursor + sPage * ITEMS_PER_PAGE);
+            RemoveItem(sItemSelectionCursor + sPage * ITEMS_PER_PAGE);
+        } else {
+            // if no item skip item conirmation
+            if (gBag[sItemSelectionCursor + sPage * ITEMS_PER_PAGE] == ITEM_NONE)
+                return;
+
+            CreateTask(Task_InitItemCofirmation, 0);
+            DestroyTask(taskId);
+        }
     }
 
     if (IsKeyPressed(KEY_Z)) {
@@ -133,3 +130,66 @@ static void Task_ItemSelection(int taskId) {
 
     DrawText(">", 0, 28 + sItemSelectionCursor * 12, 8, WHITE);
 }
+
+static void Task_InitItemCofirmation(int taskId) {
+    AddTextPrinterDefault("USE\nTOSS", CONFIRMATION_BOX, 0);
+    gTasks[taskId].func = Task_ItemConfirmation;
+}
+
+#define cursor data[0]
+
+static void Task_ItemConfirmation(int taskId) {
+    if (IsKeyPressed(KEY_X)) {
+        if (gTasks[taskId].cursor == 0) {
+            Item item = gItemsInfo[gBag[sItemSelectionCursor + sPage * ITEMS_PER_PAGE]];
+
+            switch (item.effect) {
+            case ITEM_EFFCT_HEAL:
+                gBattlePlayer.HP -= gMovesInfo[item.move].damage;
+                if (gBattlePlayer.HP > gBattlePlayer.maxHP)
+                    gBattlePlayer.HP = gBattlePlayer.maxHP;
+                break;
+            default:
+                return;
+            }
+
+            // remove the item
+            RemoveItem(sItemSelectionCursor + sPage * ITEMS_PER_PAGE);
+            goto itemSelection;
+        } else {
+            RemoveItem(sItemSelectionCursor + sPage * ITEMS_PER_PAGE);
+            goto itemSelection;
+        }
+    }
+
+    if (IsKeyPressed(KEY_Z)) {
+        goto itemSelection;
+    }
+
+    if (IsKeyPressed(KEY_UP))
+        if (--gTasks[taskId].cursor < 0)
+            gTasks[taskId].cursor = 0;
+
+    if (IsKeyPressed(KEY_DOWN)) 
+        if (++gTasks[taskId].cursor > 1)
+            gTasks[taskId].cursor = 1;
+
+    DrawText(">", CONFIRMATION_BOX.x - 8, gTasks[taskId].cursor == 0 ? CONFIRMATION_BOX.y + 4 : CONFIRMATION_BOX.y + 19, 8, WHITE);
+
+    return; 
+
+    itemSelection:
+        // shift cursor up
+        if (--sItemSelectionCursor < 0) {
+            if (sPage == 0) {
+                sItemSelectionCursor = 0;
+            } else {
+                sPage--;
+                sItemSelectionCursor = ITEMS_PER_PAGE;
+            }
+        }
+        StopAllTextPrinters();
+        gTasks[taskId].func = Task_ItemSelection;
+}
+
+#undef cursor

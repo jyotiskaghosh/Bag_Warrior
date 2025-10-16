@@ -8,7 +8,5 @@ const Monster gMonstersInfo[] = {
         .HP = 5,
         .speed = 6,
         .move = {MOVE_BITE},
-        .weakness = 0,
-        .resistance = 0
     }
 };

@@ -13,6 +13,6 @@ const Item gItemsInfo[] = {
         .name = "POTION",
         .effect = ITEM_EFFCT_HEAL,
         .move = MOVE_HEAL,
-        .description = "Recover health."
+        .description = "Recover 5 HP."
     }
 };
