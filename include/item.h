@@ -13,3 +13,4 @@ extern int gBag[BAG_CAPACITY];
 
 void CB_OpenBag();
 int ItemCount();
+void AddItem(int item);

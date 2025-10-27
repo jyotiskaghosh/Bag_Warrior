@@ -4,6 +4,8 @@
 #include "battle_main.h"
 #include "item.h"
 #include "core/text.h"
+#include "constants/item.h"
+#include "data.h"
 #include <raylib.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -43,7 +45,9 @@ typedef struct {
 
 enum {
     TILE_EMPTY,
-    TILE_FLOOR
+    TILE_FLOOR,
+    TILE_STAIR,
+    TILE_CHEST
 };
 
 static void CB_HandleDungeon();
@@ -51,11 +55,17 @@ static int RandomRoom();
 static Coordinates RandomPos(Room *r);
 static void CarveRoom(Room r);
 static void ConnectRooms(int r1, int r2);
+static void Task_OpenChest(int taskId);
+
+int gLevel;
+int gMoney;
 
 static int sMap[MAP_H][MAP_W];
 static Room sRooms[MAX_ROOMS];
 static Coordinates sPlayerPos;
 static Camera2D sCamera;
+
+static bool sIsFieldControlLocked;
 
 // Fill map with walls
 static void ClearMap(void) {
@@ -279,6 +289,22 @@ static Coordinates FindFloor() {
     return RandomPos(r);
 }
 
+static void PutStair() {
+    Coordinates c = FindFloor();
+    sMap[c.y][c.x] = TILE_STAIR;
+}
+
+static void PutChests() {
+#define MAX_CHESTS 9
+#define CHEST_CHANCE 50
+    for (int i = 0; i < MAX_CHESTS; i++) {
+        if (GetRandomValue(0, 100) < CHEST_CHANCE) {
+            Coordinates c = FindFloor();
+            sMap[c.y][c.x] = TILE_CHEST;
+        }
+    }
+}
+
 static void DrawMap() {
     for (int y = 0; y < MAP_H; y++)
         for (int x = 0; x < MAP_W; x++) {
@@ -290,13 +316,19 @@ static void DrawMap() {
             case TILE_FLOOR:
                 DrawText(".", x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, WHITE);
                 break;
+            case TILE_STAIR:
+                DrawText("S", x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, WHITE);
+                break;
+            case TILE_CHEST:
+                DrawText("C", x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, WHITE);
+                break;
             default:
                 break;
             }
         }
 }
 
-#define HP_BOX (Rectangle){0, 0, 80, 16}
+#define INFO_BAR (Rectangle){0, 0, VIRTUAL_WIDTH, 16}
 
 static void DrawCameraView() {
     char buffer[16];
@@ -311,44 +343,53 @@ static void DrawCameraView() {
         DrawText("@", sPlayerPos.x * TILE_SIZE, sPlayerPos.y * TILE_SIZE, TILE_SIZE, WHITE);
     EndMode2D();
 
-    DrawRectangleRec(HP_BOX, BLACK);
-    DrawRectangleLinesEx(HP_BOX, 1, WHITE);
+    DrawRectangleRec(INFO_BAR, BLACK);
+    DrawLine(0, 16, VIRTUAL_WIDTH, 16, WHITE);
+
     sprintf(buffer, "HP: %d / %d", gBattlePlayer.HP, gBattlePlayer.maxHP);
     DrawText(buffer, 4, 4, 8, WHITE);
+
+    sprintf(buffer, "Money: %d", gMoney);
+    DrawText(buffer, VIRTUAL_WIDTH * 1 / 3, 4, 8, WHITE);
+
+    sprintf(buffer, "Level: %d", gLevel);
+    DrawText(buffer, VIRTUAL_WIDTH * 2 / 3, 4, 8, WHITE);
 }
 
-#undef HP_BOX
+#undef INFO_BAR
 
 static void Task_HandleOverworld(int taskId) {
+    if (sIsFieldControlLocked) return;
+
     if (IsKeyPressed(KEY_UP)) {
-        if (sPlayerPos.y - 1 >= 0 && sMap[sPlayerPos.y - 1][sPlayerPos.x] == TILE_FLOOR) {
+        if (sPlayerPos.y - 1 >= 0 && sMap[sPlayerPos.y - 1][sPlayerPos.x] != TILE_EMPTY) {
             sPlayerPos.y--;
 
-            goto encounter;
+            goto doMovementActions;
         }
     }
 
     if (IsKeyPressed(KEY_DOWN)) {
-        if (sPlayerPos.y + 1 < MAP_H && sMap[sPlayerPos.y + 1][sPlayerPos.x] == TILE_FLOOR) {
+        if (sPlayerPos.y + 1 < MAP_H && sMap[sPlayerPos.y + 1][sPlayerPos.x] != TILE_EMPTY) {
             sPlayerPos.y++;
 
-            goto encounter;
+            goto doMovementActions;
         }
     } 
 
     if (IsKeyPressed(KEY_LEFT)) {
-        if (sPlayerPos.x - 1 >= 0 && sMap[sPlayerPos.y][sPlayerPos.x - 1] == TILE_FLOOR) {
+        if (sPlayerPos.x - 1 >= 0 && sMap[sPlayerPos.y][sPlayerPos.x - 1] != TILE_EMPTY) {
             sPlayerPos.x--;
 
-            goto encounter;
+            goto doMovementActions;
         }
     }
 
     if (IsKeyPressed(KEY_RIGHT)) {
-        if (sPlayerPos.x + 1 < MAP_W && sMap[sPlayerPos.y][sPlayerPos.x + 1] == TILE_FLOOR) {
+        if (sPlayerPos.x + 1 < MAP_W && sMap[sPlayerPos.y][sPlayerPos.x + 1] != TILE_EMPTY) {
             sPlayerPos.x++;
 
-            goto encounter;
+            goto doMovementActions;
         }
     }
 
@@ -359,19 +400,67 @@ static void Task_HandleOverworld(int taskId) {
 
     return;
 
-    encounter:
+    doMovementActions:
+        switch (sMap[sPlayerPos.y][sPlayerPos.x]) {
+        case TILE_STAIR:
+            gMainCallback = CB_NewLevel;
+            DestroyTask(taskId);
+            return;
+        case TILE_CHEST:
+            CreateTask(Task_OpenChest, 0);
+            sMap[sPlayerPos.y][sPlayerPos.x] = TILE_FLOOR;
+            return;
+        }
+
         if (GetRandomValue(0, 100) < ENCOUNTER_RATE) {
             DestroyTask(taskId);
             gMainCallback = CB_InitBattle;
         }
 }
 
+#define state data[0]
+#define MAX_CHEST_MONEY 1000
+#define TEXT_BOX (Rectangle){60, VIRTUAL_HEIGHT * 3/4, 200, VIRTUAL_HEIGHT * 1/4}
+
+static void Task_OpenChest(int taskId) {
+    char buffer[52];
+    int money = 0;
+
+    switch (gTasks[taskId].state) {
+    case 0:
+        sIsFieldControlLocked = true;
+
+        money = GetRandomValue(0, MAX_CHEST_MONEY);
+        gMoney += money; 
+
+        AddItem(ITEM_THROWING_KNIFE);
+
+        sprintf(buffer, "You got %d money\nYou got a %s", money, gItemsInfo[ITEM_THROWING_KNIFE].name);
+        AddTextPrinterDefault(buffer, TEXT_BOX, 4);
+        gTasks[taskId].state++;
+        break;
+    case 1:
+        if (IsKeyPressed(KEY_Z) || IsKeyPressed(KEY_X)) {
+            sIsFieldControlLocked = false;
+            StopAllTextPrinters();
+            DestroyTask(taskId);
+        }
+        break;
+    default:
+        break;
+    }
+}
+
 void CB_NewLevel() {
+    gLevel++;
+
     ClearMap();
     GenerateRooms();
     GeneratePassages();
 
-    sPlayerPos = FindFloor();
+    PutStair();
+    PutChests();
+    sPlayerPos = FindFloor();  
     
     gMainCallback = CB_HandleDungeon;
     CreateTask(Task_HandleOverworld, 0);
@@ -385,5 +474,6 @@ void CB_LoadDungeon() {
 
 static void CB_HandleDungeon() {
     DrawCameraView();
+    RunTextPrinters();
     RunTasks();
 }

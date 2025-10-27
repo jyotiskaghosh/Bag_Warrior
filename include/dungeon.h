@@ -8,5 +8,8 @@
 #define ROOM_ROWS 3
 #define ROOM_COLS 3
 
+extern int gLevel;
+extern int gMoney;
+
 void CB_NewLevel();
 void CB_LoadDungeon();

@@ -36,6 +36,14 @@ int ItemCount() {
     return count;
 }
 
+void AddItem(int item) {
+    for (int i = 0; i < BAG_CAPACITY; i++)
+        if (gBag[i] == ITEM_NONE) {
+            gBag[i] = item;
+            return;
+        }
+}
+
 static void RemoveItem(int index) {
     for (int i = index; i < BAG_CAPACITY; i++) {
         if (gBag[i] == ITEM_NONE)

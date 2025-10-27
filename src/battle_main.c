@@ -14,6 +14,7 @@
 #include <stdio.h>
 
 #define BATTLE_TEXT_BOX (Rectangle){60, VIRTUAL_HEIGHT * 3/4, 200, VIRTUAL_HEIGHT * 1/4}
+#define MONSTER_SPRITE_BOX (Rectangle){VIRTUAL_WIDTH / 2, VIRTUAL_HEIGHT / 2, 64, 64}
 #define state data[0]
 
 void CB_HandleBattle();
@@ -24,12 +25,37 @@ void Task_ActionSelection(int taskId);
 static void Task_OpponentPlaysMove(int taskId);
 void Task_PlayMove(int taskId);
 static void Task_Victory(int taskId);
+static void Task_VictoryReward(int taskId);
 static void Task_Defeat(int taskId);
 static void Task_Flee(int taskId);
 
 bool gInBattle;
 BattlePlayer gBattlePlayer;
 BattleMonster gBattleOpponent;
+int sMonsterSpriteId;
+
+static const AnimCmd sMonsterAnim[] = {
+    ANIMCMD_FRAME(0, 0, 8),
+    ANIMCMD_JUMP(0),
+};
+
+static const AnimCmd *const sMonsterAnims[] = {
+    sMonsterAnim,
+};
+
+static void sDummySpriteCallback(Sprite *s) {}
+
+static void sMonsterDefeatSpriteCB(Sprite *s) {
+    if (++s->bounds.y > VIRTUAL_HEIGHT)
+        DestroySprite(s);
+} 
+
+static const SpriteTemplate sMonsterTemplate = {
+    .width = 64,
+    .height = 64,
+    .anims = sMonsterAnims,
+    .callback = sDummySpriteCallback,
+};
 
 void CB_InitBattle() {
     gInBattle = true;
@@ -40,6 +66,7 @@ void CB_InitBattle() {
     };
 
     CreateTask(Task_EncounterText, 0);
+    sMonsterSpriteId = CreateSprite(&sMonsterTemplate, LoadTexture("graphics/IntimidatingWolf.png"), MONSTER_SPRITE_BOX, 0);
 
     gMainCallback = CB_HandleBattle;
 }
@@ -245,8 +272,33 @@ static void Task_Victory(int taskId) {
     case 0:
         sprintf(buffer, "You defeated %s", gBattleOpponent.info->name);
         AddTextPrinterDefault(buffer, BATTLE_TEXT_BOX, 4);
+        gSprites[sMonsterSpriteId].callback = sMonsterDefeatSpriteCB;
         gTasks[taskId].state++;
         gInBattle = false;
+        break;
+    case 1:
+        if (IsKeyPressed(KEY_Z) || IsKeyPressed(KEY_X)) {
+            DestroyTask(taskId);
+            if (gBattleOpponent.info->item) 
+                CreateTask(Task_VictoryReward, 0);
+            else 
+                gMainCallback = CB_LoadDungeon;
+        }
+        break;
+    default:
+        break;
+    }
+}
+
+static void Task_VictoryReward(int taskId) {
+    char buffer[32];    
+
+    switch (gTasks[taskId].state) {
+    case 0:
+        AddItem(gBattleOpponent.info->item);
+        sprintf(buffer, "You got a %s", gItemsInfo[gBattleOpponent.info->item].name);
+        AddTextPrinterDefault(buffer, BATTLE_TEXT_BOX, 4);
+        gTasks[taskId].state++;
         break;
     case 1:
         if (IsKeyPressed(KEY_Z) || IsKeyPressed(KEY_X)) {

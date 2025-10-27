@@ -57,6 +57,7 @@ void CB_NewGame() {
     gBattlePlayer = (BattlePlayer){10, 10, 5};
     InitBag();
     gMainCallback = CB_NewLevel;
+    gLevel = 0;
 }
 
 static void InitBag() {

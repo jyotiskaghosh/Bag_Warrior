@@ -19,8 +19,7 @@ typedef struct {
     int speed;
     int weakness;
     int resistance;
-    int primaryItem;
-    int secondaryItem;
+    int item;
 } Monster;
 
 typedef struct {
