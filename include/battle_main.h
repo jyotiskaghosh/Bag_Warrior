@@ -2,8 +2,6 @@
 
 #include <stdbool.h>
 
-#define MAX_MOVES 4
-
 typedef struct {
     char name[16];
     int effect;
@@ -14,7 +12,7 @@ typedef struct {
 
 typedef struct {
     char name[16];
-    int move[MAX_MOVES];
+    int move;
     int HP;
     int speed;
     int weakness;

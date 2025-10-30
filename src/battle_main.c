@@ -57,16 +57,64 @@ static const SpriteTemplate sMonsterTemplate = {
     .callback = sDummySpriteCallback,
 };
 
+typedef struct {
+    int monster;
+    int rarity;
+} MonsterEncounter;
+
+static MonsterEncounter sEncounterTable1[] = {
+    {MONSTER_WOLF, 30},
+    {MONSTER_BAT, 30},
+    {MONSTER_WIZARD_A, 10},
+    {MONSTER_WIZARD_E, 10},
+    {MONSTER_WIZARD_W, 10},
+    {MONSTER_WIZARD_F, 10},
+    {MONSTER_DRAGON, 0}
+};
+
+static MonsterEncounter sEncounterTable2[] = {
+    {MONSTER_WOLF, 25},
+    {MONSTER_BAT, 25},
+    {MONSTER_WIZARD_A, 10},
+    {MONSTER_WIZARD_E, 10},
+    {MONSTER_WIZARD_W, 10},
+    {MONSTER_WIZARD_F, 10},
+    {MONSTER_DRAGON, 10}
+};
+
+#define MONSTER_COUNT 7
+
+static int GetRandomMonster(void) {
+    int totalWeight = 0;
+    MonsterEncounter *table = gLevel < 5 ? sEncounterTable1 : sEncounterTable2;
+
+    for (int i = 0; i < MONSTER_COUNT; i++)
+        totalWeight += table[i].rarity;
+
+    int r = GetRandomValue(1, totalWeight);
+    for (int i = 0; i < MONSTER_COUNT; i++) {
+        r -= table[i].rarity;
+
+        if (r <= 0)
+            return table[i].monster;
+    }
+    return table[0].monster; // fallback
+}
+
+#undef MONSTER_COUNT
+
 void CB_InitBattle() {
     gInBattle = true;
 
+    int mon = GetRandomMonster();
+
     gBattleOpponent = (BattleMonster){
-        .info = &gMonstersInfo[MONSTER_WOLF],
-        .HP = gMonstersInfo[MONSTER_WOLF].HP
+        .info = &gMonstersInfo[mon],
+        .HP = gMonstersInfo[mon].HP
     };
 
     CreateTask(Task_EncounterText, 0);
-    sMonsterSpriteId = CreateSprite(&sMonsterTemplate, LoadTexture("graphics/IntimidatingWolf.png"), MONSTER_SPRITE_BOX, 0);
+    //sMonsterSpriteId = CreateSprite(&sMonsterTemplate, LoadTexture("graphics/wolf.png"), MONSTER_SPRITE_BOX, 0);
 
     gMainCallback = CB_HandleBattle;
 }
@@ -78,8 +126,8 @@ void CB_HandleBattle() {
     RunTasks();
 }
 
-#define PLAYER_HEALTHBOX (Rectangle){0, 0, 80, 32}
-#define OPPONENT_HEALTHBOX (Rectangle){VIRTUAL_WIDTH - 80, 0, 80, 32}
+#define PLAYER_HEALTHBOX (Rectangle){0, 0, 100, 32}
+#define OPPONENT_HEALTHBOX (Rectangle){VIRTUAL_WIDTH - 100, 0, 100, 32}
 
 static void DrawBattleInterface() {
     // player healthbox
@@ -179,15 +227,9 @@ void Task_ActionSelection(int taskId) {
 #undef cursor
 
 static void Task_OpponentPlaysMove(int taskId) {
-    int count = 0; // find valid moves
-
-    for (int i = 0; i < MAX_MOVES; i++)
-        if (gBattleOpponent.info->move[i] != MOVE_NONE)
-            count++;
-
     gTasks[taskId].func = Task_PlayMove;
     gTasks[taskId].data[1] = OPPONENT;
-    gTasks[taskId].data[2] = gBattleOpponent.info->move[GetRandomValue(0, count - 1)];
+    gTasks[taskId].data[2] = gBattleOpponent.info->move;
 }
 
 #define user data[1]
@@ -201,8 +243,28 @@ void Task_PlayMove(int taskId) {
     case 0:
         switch (gMovesInfo[gTasks[taskId].move].effect) {
         case EFFECT_HIT:
+            // accuracy check
+            if (!(GetRandomValue(0, 100) < gMovesInfo[gTasks[taskId].move].accuracy)) {
+                if (gTasks[taskId].user == PLAYER)
+                    sprintf(buffer, "You used %s\nIt missed", gMovesInfo[gTasks[taskId].move].name);
+                else 
+                    sprintf(buffer, "%s used %s\nIt missed", gBattleOpponent.info->name, gMovesInfo[gTasks[taskId].move].name);
+                
+                AddTextPrinterDefault(buffer, BATTLE_TEXT_BOX, 4);
+                gTasks[taskId].state = 2;
+                break;
+            }
+
             if (gTasks[taskId].user == PLAYER) {
-                gBattleOpponent.HP -= gMovesInfo[gTasks[taskId].move].damage;
+                float mod = 1; // damage modifier
+
+                if (gBattleOpponent.info->weakness & gMovesInfo[gTasks[taskId].move].flags)
+                    mod = 2;
+
+                if (gBattleOpponent.info->resistance & gMovesInfo[gTasks[taskId].move].flags)
+                    mod = 0.5;
+
+                gBattleOpponent.HP -= (int)(gMovesInfo[gTasks[taskId].move].damage * mod);
                 if (gBattleOpponent.HP < 0)
                     gBattleOpponent.HP = 0;
                 sprintf(buffer, "You used %s", gMovesInfo[gTasks[taskId].move].name);
@@ -254,6 +316,16 @@ void Task_PlayMove(int taskId) {
                 CreateTask(Task_OpponentPlaysMove, 0);
             else 
                 CreateTask(Task_ActionSelection, 0);
+            DestroyTask(taskId);
+        }
+        break;
+    case 2:
+        if (IsKeyPressed(KEY_X) || IsKeyPressed(KEY_Z)) {
+            if (gTasks[taskId].user == PLAYER)
+                CreateTask(Task_OpponentPlaysMove, 0);
+            else 
+                CreateTask(Task_ActionSelection, 0);
+            
             DestroyTask(taskId);
         }
         break;

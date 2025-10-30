@@ -2,7 +2,7 @@
 
 #define ELEMENT_EARTH (1 << 0)
 #define ELEMENT_WATER (1 << 1)
-#define ELEMENT_WIND (1 << 2)
+#define ELEMENT_AIR (1 << 2)
 #define ELEMENT_FIRE (1 << 3)
 
 enum {
@@ -15,6 +15,12 @@ enum {
     MOVE_NONE,
     MOVE_BITE,
     MOVE_THROWING_KNIFE,
+    MOVE_BOMB,
+    MOVE_EARTH_SPELL,
+    MOVE_WATER_SPELL,
+    MOVE_AIR_SPELL,
+    MOVE_FIRE_SPELL,
+    MOVE_DRAGON_FIRE,
     MOVE_HEAL,
     MOVE_COUNT
 };

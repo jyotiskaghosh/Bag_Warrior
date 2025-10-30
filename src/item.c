@@ -152,7 +152,7 @@ static void Task_ItemConfirmation(int taskId) {
             Item item = gItemsInfo[gBag[sItemSelectionCursor + sPage * ITEMS_PER_PAGE]];
 
             switch (item.effect) {
-            case ITEM_EFFCT_HEAL:
+            case ITEM_EFFECT_HEAL:
                 gBattlePlayer.HP -= gMovesInfo[item.move].damage;
                 if (gBattlePlayer.HP > gBattlePlayer.maxHP)
                     gBattlePlayer.HP = gBattlePlayer.maxHP;

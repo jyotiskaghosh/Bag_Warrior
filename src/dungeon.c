@@ -451,6 +451,8 @@ static void Task_OpenChest(int taskId) {
     }
 }
 
+#undef state
+
 void CB_NewLevel() {
     gLevel++;
 
