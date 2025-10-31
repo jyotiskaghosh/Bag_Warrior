@@ -404,14 +404,26 @@ static void Task_Defeat(int taskId) {
 static void Task_Flee(int taskId) {
     switch (gTasks[taskId].state) {
     case 0:
-        AddTextPrinterDefault("You ran away", BATTLE_TEXT_BOX, 4);
-        gTasks[taskId].state++;
-        gInBattle = false;
+        if (GetRandomValue(0, gBattlePlayer.speed + gBattleOpponent.info->speed) < gBattleOpponent.info->speed) {
+            AddTextPrinterDefault("You ran away", BATTLE_TEXT_BOX, 4);
+            gTasks[taskId].state++;
+            gInBattle = false;
+        } else {
+            AddTextPrinterDefault("Failed to run away", BATTLE_TEXT_BOX, 4);
+            gTasks[taskId].state = 2;
+        }
         break;
     case 1:
         if (IsKeyPressed(KEY_Z) || IsKeyPressed(KEY_X)) {
             DestroyTask(taskId);
             gMainCallback = CB_LoadDungeon;
+        }
+        break;
+    case 2:
+        if (IsKeyPressed(KEY_Z) || IsKeyPressed(KEY_X)) {
+            StopAllTextPrinters();
+            CreateTask(Task_OpponentPlaysMove, 0);
+            DestroyTask(taskId);
         }
         break;
     default:

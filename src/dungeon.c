@@ -422,9 +422,43 @@ static void Task_HandleOverworld(int taskId) {
 #define MAX_CHEST_MONEY 1000
 #define TEXT_BOX (Rectangle){60, VIRTUAL_HEIGHT * 3/4, 200, VIRTUAL_HEIGHT * 1/4}
 
+typedef struct {
+    int item;
+    int rarity;
+} ChestDrop;
+
+static ChestDrop sChestDrops[] = {
+    {ITEM_THROWING_KNIFE, 10},
+    {ITEM_BOMB, 10},
+    {ITEM_POTION, 10},
+    {ITEM_EARTH_SCROLL, 10},
+    {ITEM_WATER_SCROLL, 10},
+    {ITEM_AIR_SCROLL, 10},
+    {ITEM_FIRE_SCROLL, 10},
+    {ITEM_DRAGON_SCALE, 5},
+    {ITEM_ESCAPE_SCROLL, 5},
+};
+
+static int GetRandomItem(void) {
+    int totalWeight = 0;
+
+    for (int i = 0; i < ITEM_COUNT - 1; i++)
+        totalWeight += sChestDrops[i].rarity;
+
+    int r = GetRandomValue(1, totalWeight);
+    for (int i = 0; i < ITEM_COUNT - 1; i++) {
+        r -= sChestDrops[i].rarity;
+
+        if (r <= 0)
+            return sChestDrops[i].item;
+    }
+    return sChestDrops[0].item; // fallback
+}
+
 static void Task_OpenChest(int taskId) {
     char buffer[52];
     int money = 0;
+    int item = 0;
 
     switch (gTasks[taskId].state) {
     case 0:
@@ -433,9 +467,11 @@ static void Task_OpenChest(int taskId) {
         money = GetRandomValue(0, MAX_CHEST_MONEY);
         gMoney += money; 
 
-        AddItem(ITEM_THROWING_KNIFE);
+        item = GetRandomItem();
 
-        sprintf(buffer, "You got %d money\nYou got a %s", money, gItemsInfo[ITEM_THROWING_KNIFE].name);
+        AddItem(item);
+
+        sprintf(buffer, "You got %d money\nYou got a %s", money, gItemsInfo[item].name);
         AddTextPrinterDefault(buffer, TEXT_BOX, 4);
         gTasks[taskId].state++;
         break;

@@ -22,8 +22,8 @@ const Monster gMonstersInfo[] = {
         .HP = 6,
         .speed = 4,
         .move = MOVE_EARTH_SPELL,
-        .resistance = ELEMENT_FIRE | ELEMENT_EARTH,
-        .weakness = ELEMENT_WATER,
+        .resistance = ELEMENT_EARTH | ELEMENT_WATER,
+        .weakness = ELEMENT_AIR,
         .item = ITEM_EARTH_SCROLL,
     },
     [MONSTER_WIZARD_A] = {
@@ -41,7 +41,7 @@ const Monster gMonstersInfo[] = {
         .speed = 4,
         .move = MOVE_WATER_SPELL,
         .resistance = ELEMENT_WATER | ELEMENT_FIRE,
-        .weakness = ELEMENT_AIR,
+        .weakness = ELEMENT_EARTH,
         .item = ITEM_WATER_SCROLL,
     },
     [MONSTER_WIZARD_F] = {
@@ -50,7 +50,7 @@ const Monster gMonstersInfo[] = {
         .speed = 4,
         .move = MOVE_FIRE_SPELL,
         .resistance = ELEMENT_FIRE | ELEMENT_AIR,
-        .weakness = ELEMENT_EARTH,
+        .weakness = ELEMENT_WATER,
         .item = ITEM_FIRE_SCROLL,
     },
     [MONSTER_DRAGON] = {

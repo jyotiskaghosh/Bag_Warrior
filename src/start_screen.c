@@ -55,15 +55,23 @@ static void Task_StartScreenSelection(int taskId) {
 void CB_NewGame() {
     StopAllTextPrinters();
     gBattlePlayer = (BattlePlayer){10, 10, 5};
-    InitBag();
-    gMainCallback = CB_NewLevel;
     gLevel = 0;
+    gMoney = 0;
+    InitBag();
+
+    gMainCallback = CB_NewLevel;
 }
 
 static void InitBag() {
     gBag[0] = ITEM_THROWING_KNIFE;
     gBag[1] = ITEM_THROWING_KNIFE;
     gBag[2] = ITEM_THROWING_KNIFE;
-    gBag[3] = ITEM_POTION;
-    gBag[4] = ITEM_POTION;
+    gBag[3] = ITEM_THROWING_KNIFE;
+    gBag[4] = ITEM_BOMB;
+    gBag[5] = ITEM_BOMB;
+    gBag[6] = ITEM_BOMB;
+    gBag[7] = ITEM_POTION;
+    gBag[8] = ITEM_POTION;
+    gBag[9] = ITEM_POTION;
+    gBag[10] = ITEM_ESCAPE_SCROLL;
 }

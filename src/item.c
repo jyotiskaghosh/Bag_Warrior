@@ -4,6 +4,7 @@
 #include "battle_main.h"
 #include "dungeon.h"
 #include "data.h"
+#include "victory_screen.h"
 #include "constants/item.h"
 #include "core/task.h"
 #include "core/text.h"
@@ -115,7 +116,7 @@ static void Task_ItemSelection(int taskId) {
                 sItemSelectionCursor = 0;
             } else {
                 sPage--;
-                sItemSelectionCursor = ITEMS_PER_PAGE;
+                sItemSelectionCursor = ITEMS_PER_PAGE - 1;
             }
         }
     }
@@ -123,9 +124,9 @@ static void Task_ItemSelection(int taskId) {
     if (IsKeyPressed(KEY_DOWN)) {
         int temp = sItemSelectionCursor;
 
-        if (++sItemSelectionCursor > ITEMS_PER_PAGE) {
+        if (++sItemSelectionCursor >= ITEMS_PER_PAGE) {
             if (sPage == 3) {
-                sItemSelectionCursor = ITEMS_PER_PAGE;
+                sItemSelectionCursor = ITEMS_PER_PAGE - 1;
             } else {
                 sPage++;
                 sItemSelectionCursor = 0;
@@ -156,6 +157,10 @@ static void Task_ItemConfirmation(int taskId) {
                 gBattlePlayer.HP -= gMovesInfo[item.move].damage;
                 if (gBattlePlayer.HP > gBattlePlayer.maxHP)
                     gBattlePlayer.HP = gBattlePlayer.maxHP;
+                break;
+            case ITEM_EFFECT_ESCAPE:
+                DestroyTask(taskId);
+                gMainCallback = CB_InitVictoryScreen;
                 break;
             default:
                 return;
