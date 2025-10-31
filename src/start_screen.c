@@ -63,6 +63,8 @@ void CB_NewGame() {
 }
 
 static void InitBag() {
+    EmptyBag();
+
     gBag[0] = ITEM_THROWING_KNIFE;
     gBag[1] = ITEM_THROWING_KNIFE;
     gBag[2] = ITEM_THROWING_KNIFE;
@@ -73,5 +75,4 @@ static void InitBag() {
     gBag[7] = ITEM_POTION;
     gBag[8] = ITEM_POTION;
     gBag[9] = ITEM_POTION;
-    gBag[10] = ITEM_ESCAPE_SCROLL;
 }
