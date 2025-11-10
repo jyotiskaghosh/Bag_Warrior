@@ -12,6 +12,7 @@ typedef struct {
 
 typedef struct {
     char name[16];
+    char imageFilename[32];
     int move;
     int HP;
     int speed;

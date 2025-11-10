@@ -46,7 +46,9 @@ static const AnimCmd *const sMonsterAnims[] = {
 static void sDummySpriteCallback(Sprite *s) {}
 
 static void sMonsterDefeatSpriteCB(Sprite *s) {
-    if (++s->bounds.y > VIRTUAL_HEIGHT)
+    s->bounds.y += 0.1;
+
+    if (s->bounds.y > VIRTUAL_HEIGHT)
         DestroySprite(s);
 } 
 
@@ -65,28 +67,28 @@ typedef struct {
 static MonsterEncounter sEncounterTable1[] = {
     {MONSTER_WOLF, 30},
     {MONSTER_BAT, 30},
-    {MONSTER_WIZARD_A, 10},
-    {MONSTER_WIZARD_E, 10},
-    {MONSTER_WIZARD_W, 10},
-    {MONSTER_WIZARD_F, 10},
+    {MONSTER_AIR_MAGE, 10},
+    {MONSTER_EARTH_MAGE, 10},
+    {MONSTER_WATER_MAGE, 10},
+    {MONSTER_FIRE_MAGE, 10},
     {MONSTER_DRAGON, 0}
 };
 
 static MonsterEncounter sEncounterTable2[] = {
-    {MONSTER_WOLF, 25},
-    {MONSTER_BAT, 25},
-    {MONSTER_WIZARD_A, 10},
-    {MONSTER_WIZARD_E, 10},
-    {MONSTER_WIZARD_W, 10},
-    {MONSTER_WIZARD_F, 10},
-    {MONSTER_DRAGON, 10}
+    {MONSTER_WOLF, 30},
+    {MONSTER_BAT, 30},
+    {MONSTER_AIR_MAGE, 10},
+    {MONSTER_EARTH_MAGE, 10},
+    {MONSTER_WATER_MAGE, 10},
+    {MONSTER_FIRE_MAGE, 10},
+    {MONSTER_DRAGON, 5}
 };
-
-#define MONSTER_COUNT 7
 
 static int GetRandomMonster(void) {
     int totalWeight = 0;
-    MonsterEncounter *table = gLevel < 5 ? sEncounterTable1 : sEncounterTable2;
+    MonsterEncounter *table = gLevel < 3 ? sEncounterTable1 : sEncounterTable2;
+
+#define MONSTER_COUNT 7
 
     for (int i = 0; i < MONSTER_COUNT; i++)
         totalWeight += table[i].rarity;
@@ -98,23 +100,23 @@ static int GetRandomMonster(void) {
         if (r <= 0)
             return table[i].monster;
     }
+
     return table[0].monster; // fallback
 }
 
-#undef MONSTER_COUNT
 
 void CB_InitBattle() {
     gInBattle = true;
 
-    int mon = GetRandomMonster();
+    int monster = GetRandomMonster();
 
     gBattleOpponent = (BattleMonster){
-        .info = &gMonstersInfo[mon],
-        .HP = gMonstersInfo[mon].HP
+        .info = &gMonstersInfo[monster],
+        .HP = gMonstersInfo[monster].HP
     };
 
     CreateTask(Task_EncounterText, 0);
-    //sMonsterSpriteId = CreateSprite(&sMonsterTemplate, LoadTexture("graphics/wolf.png"), MONSTER_SPRITE_BOX, 0);
+    sMonsterSpriteId = CreateSprite(&sMonsterTemplate, gMonstersInfo[monster].imageFilename, MONSTER_SPRITE_BOX, 0);
 
     gMainCallback = CB_HandleBattle;
 }
@@ -404,7 +406,7 @@ static void Task_Defeat(int taskId) {
 static void Task_Flee(int taskId) {
     switch (gTasks[taskId].state) {
     case 0:
-        if (GetRandomValue(0, gBattlePlayer.speed + gBattleOpponent.info->speed) < gBattleOpponent.info->speed) {
+        if (GetRandomValue(0, gBattlePlayer.speed + gBattleOpponent.info->speed) < gBattlePlayer.speed) {
             AddTextPrinterDefault("You ran away", BATTLE_TEXT_BOX, 4);
             gTasks[taskId].state++;
             gInBattle = false;

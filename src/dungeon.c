@@ -125,11 +125,9 @@ static Coordinates RandomPos(Room *r) {
 
 // Carve room floor
 static void CarveRoom(Room r) {
-    for (int y = r.y; y < r.y + r.h; y++) {
-        for (int x = r.x; x < r.x + r.w; x++) {
+    for (int y = r.y; y < r.y + r.h; y++)
+        for (int x = r.x; x < r.x + r.w; x++)
             sMap[y][x] = TILE_FLOOR;
-        }
-    }
 }
 
 static void GeneratePassages() {
@@ -296,13 +294,10 @@ static void PutStair() {
 
 static void PutChests() {
 #define MAX_CHESTS 9
-#define CHEST_CHANCE 50
     for (int i = 0; i < MAX_CHESTS; i++) {
-        if (GetRandomValue(0, 100) < CHEST_CHANCE) {
             Coordinates c = FindFloor();
             sMap[c.y][c.x] = TILE_CHEST;
         }
-    }
 }
 
 static void DrawMap() {
@@ -435,7 +430,6 @@ static ChestDrop sChestDrops[] = {
     {ITEM_WATER_SCROLL, 10},
     {ITEM_AIR_SCROLL, 10},
     {ITEM_FIRE_SCROLL, 10},
-    {ITEM_DRAGON_SCALE, 5},
     {ITEM_ESCAPE_SCROLL, 5},
 };
 

@@ -74,5 +74,5 @@ extern Sprite gSprites[];
 
 void ResetAllSprites(void);
 void AnimateSprites(void);
-int CreateSprite(const SpriteTemplate *template, Texture2D texture, Rectangle bounds, int priority);
+int CreateSprite(const SpriteTemplate *template, const char *filename, Rectangle bounds, int priority);
 void DestroySprite(Sprite *sprite);

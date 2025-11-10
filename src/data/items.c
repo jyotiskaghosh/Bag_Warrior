@@ -45,14 +45,9 @@ const Item gItemsInfo[] = {
         .move = MOVE_FIRE_SPELL,
         .description = "Cast fire spell."
     },
-    [ITEM_DRAGON_SCALE] = {
-        .name = "DRAGON SCALE",
-        .effect = ITEM_EFFECT_PASSIVE,
-        .description = "Reduces fire damage\nwhen in bag."
-    },
     [ITEM_ESCAPE_SCROLL] = {
         .name = "ESCAPE SCROLL",
         .effect = ITEM_EFFECT_ESCAPE,
-        .description = "Exit out of the dungeon."
+        .description = "Exit the dungeon."
     }
 };
