@@ -1,3 +1,3 @@
 #pragma once
 
-void CB_InitVictoryScreen();
+void CB_InitVictoryScreen(void);

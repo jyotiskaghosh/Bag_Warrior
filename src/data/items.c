@@ -1,5 +1,5 @@
 #include "item.h"
-#include "constants/item.h"
+#include "constants/items.h"
 #include "constants/moves.h"
 
 const Item gItemsInfo[] = {

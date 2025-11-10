@@ -8,14 +8,14 @@
 
 #define DIED_TEXT "YOU DIED!"
 
-static void CB_HandleEndScreen();
+static void CB_HandleEndScreen(void);
 static void Task_EndScreenSelection(int taskId);
 
-static void DrawEndScreen() {
+static void DrawEndScreen(void) {
     DrawText(DIED_TEXT, VIRTUAL_WIDTH / 2 - MeasureText(DIED_TEXT, 32) / 2, VIRTUAL_HEIGHT / 2 - 16, 32, WHITE);
 } 
 
-void CB_InitEndScreen() {
+void CB_InitEndScreen(void) {
     StopAllTextPrinters();
     gMainCallback = CB_HandleEndScreen;
     CreateTask(Task_EndScreenSelection, 0);
@@ -28,7 +28,7 @@ static void Task_EndScreenSelection(int taskId) {
     }
 }
 
-static void CB_HandleEndScreen() {
+static void CB_HandleEndScreen(void) {
     DrawEndScreen();
     RunTasks();
 }

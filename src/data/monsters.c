@@ -1,27 +1,28 @@
 #include "battle_main.h"
 #include "constants/monsters.h"
 #include "constants/moves.h"
-#include "constants/item.h"
+#include "constants/items.h"
+#include "constants/textures.h"
 
 const Monster gMonstersInfo[] = {
     [MONSTER_WOLF] = {
         .name = "WOLF",
-        .imageFilename = "graphics/Wolf.png",
+        .textureId = TEXTURE_WOLF,
         .HP = 5,
         .speed = 5,
         .move = MOVE_BITE,
     },
     [MONSTER_BAT] = {
         .name = "BAT",
-        .imageFilename = "graphics/Bat.png",
+        .textureId = TEXTURE_BAT,
         .HP = 3,
         .speed = 7,
-        .move = MOVE_BITE,
+        .move = MOVE_SUCK_BLOOD,
         .resistance = ELEMENT_EARTH | ELEMENT_AIR,
     },
     [MONSTER_EARTH_MAGE] = {
         .name = "EARTH MAGE",
-        .imageFilename = "graphics/EarthMage.png",
+        .textureId = TEXTURE_EARTH_MAGE,
         .HP = 6,
         .speed = 4,
         .move = MOVE_EARTH_SPELL,
@@ -31,7 +32,7 @@ const Monster gMonstersInfo[] = {
     },
     [MONSTER_AIR_MAGE] = {
         .name = "AIR MAGE",
-        .imageFilename = "graphics/AirMage.png",
+        .textureId = TEXTURE_AIR_MAGE,
         .HP = 6,
         .speed = 4,
         .move = MOVE_AIR_SPELL,
@@ -41,7 +42,7 @@ const Monster gMonstersInfo[] = {
     },
     [MONSTER_WATER_MAGE] = {
         .name = "WATER MAGE",
-        .imageFilename = "graphics/WaterMage.png",
+        .textureId = TEXTURE_WATER_MAGE,
         .HP = 6,
         .speed = 4,
         .move = MOVE_WATER_SPELL,
@@ -51,7 +52,7 @@ const Monster gMonstersInfo[] = {
     },
     [MONSTER_FIRE_MAGE] = {
         .name = "FIRE MAGE",
-        .imageFilename = "graphics/FireMage.png",
+        .textureId = TEXTURE_FIRE_MAGE,
         .HP = 6,
         .speed = 4,
         .move = MOVE_FIRE_SPELL,
@@ -61,7 +62,7 @@ const Monster gMonstersInfo[] = {
     },
     [MONSTER_DRAGON] = {
         .name = "DRAGON",
-        .imageFilename = "graphics/Dragon.png",
+        .textureId = TEXTURE_DRAGON,
         .HP = 16,
         .speed = 4,
         .move = MOVE_DRAGON_FIRE,

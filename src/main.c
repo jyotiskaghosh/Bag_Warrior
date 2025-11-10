@@ -1,14 +1,20 @@
-#include <raylib.h>
 #include "main.h"
 #include "core/music.h"
 #include "start_screen.h"
+#include "constants/textures.h"
 
 void (*gMainCallback)(void);
+Texture2D gTextures[TEXTURE_COUNT];
 
-int main() {
+static void LoadTextures(void);
+static void UnloadTextures(void);
+
+int main(void) {
 	InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Bag Warrior");
 
 	InitAudioDevice();
+
+	LoadTextures();
 
 	RenderTexture2D virtualScreen = LoadRenderTexture(VIRTUAL_WIDTH, VIRTUAL_HEIGHT);
 
@@ -40,7 +46,24 @@ int main() {
 		EndDrawing();
 	}
 
+	UnloadTextures();
+
 	CloseAudioDevice();
 
 	CloseWindow();
+}
+
+static void LoadTextures(void) {
+	gTextures[TEXTURE_WOLF] = LoadTexture("graphics/Wolf.png");
+	gTextures[TEXTURE_BAT] = LoadTexture("graphics/Bat.png");
+	gTextures[TEXTURE_EARTH_MAGE] = LoadTexture("graphics/EarthMage.png");
+	gTextures[TEXTURE_AIR_MAGE] = LoadTexture("graphics/AirMage.png");
+	gTextures[TEXTURE_WATER_MAGE] = LoadTexture("graphics/WaterMage.png");
+	gTextures[TEXTURE_FIRE_MAGE] = LoadTexture("graphics/FireMage.png");
+	gTextures[TEXTURE_DRAGON] = LoadTexture("graphics/Dragon.png");
+}
+
+static void UnloadTextures(void) {
+	for (int i = 0; i < TEXTURE_COUNT; i++)
+		UnloadTexture(gTextures[i]);
 }

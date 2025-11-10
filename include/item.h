@@ -11,7 +11,7 @@ typedef struct {
 
 extern int gBag[BAG_CAPACITY];
 
-void CB_OpenBag();
-int ItemCount();
+void CB_OpenBag(void);
+int ItemCount(void);
 void AddItem(int item);
-void EmptyBag();
+void EmptyBag(void);

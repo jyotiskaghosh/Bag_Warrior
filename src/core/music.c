@@ -8,6 +8,6 @@ void PlayMusic(Music music) {
     PlayMusicStream(music);
 }
 
-void StopMusic() {
+void StopMusic(void) {
     StopMusicStream(gCurrentMusic);
 }

@@ -4,7 +4,7 @@
 #include "battle_main.h"
 #include "item.h"
 #include "core/text.h"
-#include "constants/item.h"
+#include "constants/items.h"
 #include "data.h"
 #include <raylib.h>
 #include <stdlib.h>
@@ -50,8 +50,8 @@ enum {
     TILE_CHEST
 };
 
-static void CB_HandleDungeon();
-static int RandomRoom();
+static void CB_HandleDungeon(void);
+static int RandomRoom(void);
 static Coordinates RandomPos(Room *r);
 static void CarveRoom(Room r);
 static void ConnectRooms(int r1, int r2);
@@ -74,7 +74,7 @@ static void ClearMap(void) {
             sMap[y][x] = TILE_EMPTY;
 }
 
-static void GenerateRooms() {
+static void GenerateRooms(void) {
     int cellW = MAP_W / ROOM_COLS;
     int cellH = MAP_H / ROOM_ROWS;
 
@@ -107,7 +107,7 @@ static void GenerateRooms() {
     }
 }
 
-static int RandomRoom() {
+static int RandomRoom(void) {
     int n;
     do {
         n = GetRandomValue(0, MAX_ROOMS - 1);
@@ -130,7 +130,7 @@ static void CarveRoom(Room r) {
             sMap[y][x] = TILE_FLOOR;
 }
 
-static void GeneratePassages() {
+static void GeneratePassages(void) {
     struct RoomNode *r1, *r2 = NULL;
     int i, j;
 
@@ -282,17 +282,17 @@ static void ConnectRooms(int r1, int r2) {
     }
 }
 
-static Coordinates FindFloor() {
+static Coordinates FindFloor(void) {
     Room *r = &sRooms[RandomRoom()];
     return RandomPos(r);
 }
 
-static void PutStair() {
+static void PutStair(void) {
     Coordinates c = FindFloor();
     sMap[c.y][c.x] = TILE_STAIR;
 }
 
-static void PutChests() {
+static void PutChests(void) {
 #define MAX_CHESTS 9
     for (int i = 0; i < MAX_CHESTS; i++) {
             Coordinates c = FindFloor();
@@ -300,7 +300,7 @@ static void PutChests() {
         }
 }
 
-static void DrawMap() {
+static void DrawMap(void) {
     for (int y = 0; y < MAP_H; y++)
         for (int x = 0; x < MAP_W; x++) {
             switch (sMap[y][x])
@@ -325,7 +325,7 @@ static void DrawMap() {
 
 #define INFO_BAR (Rectangle){0, 0, VIRTUAL_WIDTH, 16}
 
-static void DrawCameraView() {
+static void DrawCameraView(void) {
     char buffer[16];
 
     sCamera.target = (Vector2){sPlayerPos.x * TILE_SIZE, sPlayerPos.y * TILE_SIZE};
@@ -483,7 +483,7 @@ static void Task_OpenChest(int taskId) {
 
 #undef state
 
-void CB_NewLevel() {
+void CB_NewLevel(void) {
     gLevel++;
 
     ClearMap();
@@ -498,13 +498,13 @@ void CB_NewLevel() {
     CreateTask(Task_HandleOverworld, 0);
 }
 
-void CB_LoadDungeon() {
+void CB_LoadDungeon(void) {
     StopAllTextPrinters();
     CreateTask(Task_HandleOverworld, 0);
     gMainCallback = CB_HandleDungeon;
 }
 
-static void CB_HandleDungeon() {
+static void CB_HandleDungeon(void) {
     DrawCameraView();
     RunTextPrinters();
     RunTasks();

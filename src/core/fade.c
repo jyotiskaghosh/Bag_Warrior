@@ -19,7 +19,7 @@ void StartFadeIn(Color color) {
     gFade.active = true;
 }
 
-void RunFade() {
+void RunFade(void) {
     if (!gFade.active) return;
 
     gFade.frameCounter++;

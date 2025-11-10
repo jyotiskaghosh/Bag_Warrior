@@ -12,18 +12,17 @@
 #include "end_screen.h"
 #include <raylib.h>
 #include <stdio.h>
+#include <string.h>
 
 #define BATTLE_TEXT_BOX (Rectangle){60, VIRTUAL_HEIGHT * 3/4, 200, VIRTUAL_HEIGHT * 1/4}
 #define MONSTER_SPRITE_BOX (Rectangle){VIRTUAL_WIDTH / 2, VIRTUAL_HEIGHT / 2, 64, 64}
 #define state data[0]
+#define PLAYER_TEXT "YOU"
 
-void CB_HandleBattle();
-static void DrawBattleInterface();
+static void DrawBattleInterface(void);
 static void Task_EncounterText(int taskId);
 static void Task_StartBattle(int taskId);
-void Task_ActionSelection(int taskId);
 static void Task_OpponentPlaysMove(int taskId);
-void Task_PlayMove(int taskId);
 static void Task_Victory(int taskId);
 static void Task_VictoryReward(int taskId);
 static void Task_Defeat(int taskId);
@@ -104,8 +103,7 @@ static int GetRandomMonster(void) {
     return table[0].monster; // fallback
 }
 
-
-void CB_InitBattle() {
+void CB_InitBattle(void) {
     gInBattle = true;
 
     int monster = GetRandomMonster();
@@ -116,12 +114,12 @@ void CB_InitBattle() {
     };
 
     CreateTask(Task_EncounterText, 0);
-    sMonsterSpriteId = CreateSprite(&sMonsterTemplate, gMonstersInfo[monster].imageFilename, MONSTER_SPRITE_BOX, 0);
+    sMonsterSpriteId = CreateSprite(&sMonsterTemplate, gTextures[gMonstersInfo[monster].textureId], MONSTER_SPRITE_BOX, 0);
 
     gMainCallback = CB_HandleBattle;
 }
 
-void CB_HandleBattle() {
+void CB_HandleBattle(void) {
     DrawBattleInterface();
     AnimateSprites();
     RunTextPrinters();
@@ -131,7 +129,7 @@ void CB_HandleBattle() {
 #define PLAYER_HEALTHBOX (Rectangle){0, 0, 100, 32}
 #define OPPONENT_HEALTHBOX (Rectangle){VIRTUAL_WIDTH - 100, 0, 100, 32}
 
-static void DrawBattleInterface() {
+static void DrawBattleInterface(void) {
     // player healthbox
     int maxHP = gBattlePlayer.maxHP;
     int HP = gBattlePlayer.HP;
@@ -234,11 +232,36 @@ static void Task_OpponentPlaysMove(int taskId) {
     gTasks[taskId].data[2] = gBattleOpponent.info->move;
 }
 
+static void Recover(int user, int HP) {
+    if (user == PLAYER) {
+        gBattlePlayer.HP += HP;
+        if (gBattlePlayer.HP > gBattlePlayer.maxHP)
+            gBattlePlayer.HP = gBattlePlayer.maxHP;
+    }else {
+        gBattleOpponent.HP += HP;
+        if (gBattleOpponent.HP > gBattleOpponent.info->HP)
+            gBattleOpponent.HP = gBattleOpponent.info->HP;
+    }
+}
+
+static void Damage(int user, int HP) {
+    if (user == PLAYER) {
+        gBattlePlayer.HP -= HP;
+        if (gBattlePlayer.HP < 0)
+            gBattlePlayer.HP = 0;
+    }else {
+        gBattleOpponent.HP -= HP;
+        if (gBattleOpponent.HP < 0)
+            gBattleOpponent.HP = 0;
+    }
+}
+
 #define user data[1]
 #define move data[2]
 
 void Task_PlayMove(int taskId) {
     char buffer[64];
+    char userText[16];
 
     switch (gTasks[taskId].state)
     {
@@ -248,10 +271,11 @@ void Task_PlayMove(int taskId) {
             // accuracy check
             if (!(GetRandomValue(0, 100) < gMovesInfo[gTasks[taskId].move].accuracy)) {
                 if (gTasks[taskId].user == PLAYER)
-                    sprintf(buffer, "You used %s\nIt missed", gMovesInfo[gTasks[taskId].move].name);
+                    strcpy(userText, PLAYER_TEXT);
                 else 
-                    sprintf(buffer, "%s used %s\nIt missed", gBattleOpponent.info->name, gMovesInfo[gTasks[taskId].move].name);
-                
+                    strcpy(userText, gBattleOpponent.info->name);
+
+                sprintf(buffer, "%s used %s\nIt missed", userText, gMovesInfo[gTasks[taskId].move].name);
                 AddTextPrinterDefault(buffer, BATTLE_TEXT_BOX, 4);
                 gTasks[taskId].state = 2;
                 break;
@@ -266,33 +290,63 @@ void Task_PlayMove(int taskId) {
                 if (gBattleOpponent.info->resistance & gMovesInfo[gTasks[taskId].move].flags)
                     mod = 0.5;
 
-                gBattleOpponent.HP -= (int)(gMovesInfo[gTasks[taskId].move].damage * mod);
-                if (gBattleOpponent.HP < 0)
-                    gBattleOpponent.HP = 0;
-                sprintf(buffer, "You used %s", gMovesInfo[gTasks[taskId].move].name);
+                Damage(OPPONENT, (int)(gMovesInfo[gTasks[taskId].move].damage * mod));
+                strcpy(userText, PLAYER_TEXT);
             } else {
-                gBattlePlayer.HP -= gMovesInfo[gTasks[taskId].move].damage;
-                if (gBattlePlayer.HP < 0)
-                    gBattlePlayer.HP = 0;
-                sprintf(buffer, "%s used %s", gBattleOpponent.info->name, gMovesInfo[gTasks[taskId].move].name);
+                Damage(PLAYER, gMovesInfo[gTasks[taskId].move].damage);
+                strcpy(userText, gBattleOpponent.info->name);
             }
 
+            sprintf(buffer, "%s used %s", userText, gMovesInfo[gTasks[taskId].move].name);
             AddTextPrinterDefault(buffer, BATTLE_TEXT_BOX, 4);
             gTasks[taskId].state++;
             break;
         case EFFECT_HEAL:
-            if (gTasks[taskId].user == PLAYER) {
-                gBattlePlayer.HP -= gMovesInfo[gTasks[taskId].move].damage;
-                if (gBattlePlayer.HP > gBattlePlayer.maxHP)
-                    gBattlePlayer.HP = gBattlePlayer.maxHP;
-                sprintf(buffer, "You used %s\nHealed %d HP", gMovesInfo[gTasks[taskId].move].name, -gMovesInfo[gTasks[taskId].move].damage);
-            } else {
-                gBattleOpponent.HP -= gMovesInfo[gTasks[taskId].move].damage;
-                if (gBattleOpponent.HP > gBattleOpponent.info->HP)
-                    gBattleOpponent.HP = gBattleOpponent.info->HP; 
-                sprintf(buffer, "%s used %s\nHealed %d HP", gBattleOpponent.info->name, gMovesInfo[gTasks[taskId].move].name, -gMovesInfo[gTasks[taskId].move].damage);
+            Recover(gTasks[taskId].user, -gMovesInfo[gTasks[taskId].move].damage);
+            if (gTasks[taskId].user == PLAYER)
+                strcpy(userText, PLAYER_TEXT);
+            else
+                strcpy(userText, gBattleOpponent.info->name);
+
+            sprintf(buffer, "%s used %s\nRecovered health", userText, gMovesInfo[gTasks[taskId].move].name);
+            AddTextPrinterDefault(buffer, BATTLE_TEXT_BOX, 4);
+            gTasks[taskId].state++;
+            break;
+        case EFFECT_ABSORB:
+            // accuracy check
+            if (!(GetRandomValue(0, 100) < gMovesInfo[gTasks[taskId].move].accuracy)) {
+                if (gTasks[taskId].user == PLAYER)
+                    strcpy(userText, PLAYER_TEXT);
+                else 
+                    strcpy(userText, gBattleOpponent.info->name);
+
+                sprintf(buffer, "%s used %s\nIt missed", userText, gMovesInfo[gTasks[taskId].move].name);
+                AddTextPrinterDefault(buffer, BATTLE_TEXT_BOX, 4);
+                gTasks[taskId].state = 2;
+                break;
             }
 
+            if (gTasks[taskId].user == PLAYER) {
+                float mod = 1; // damage modifier
+
+                if (gBattleOpponent.info->weakness & gMovesInfo[gTasks[taskId].move].flags)
+                    mod = 2;
+
+                if (gBattleOpponent.info->resistance & gMovesInfo[gTasks[taskId].move].flags)
+                    mod = 0.5;
+
+                int damage = (int)(gMovesInfo[gTasks[taskId].move].damage * mod);
+                Damage(OPPONENT, damage);
+                Recover(PLAYER, damage);
+                strcpy(userText, PLAYER_TEXT);
+            } else {
+                int damage = gMovesInfo[gTasks[taskId].move].damage;
+                Damage(PLAYER, damage);
+                Recover(OPPONENT, damage);
+                strcpy(userText, gBattleOpponent.info->name);
+            }
+
+            sprintf(buffer, "%s used %s\nAbsorbed health", userText, gMovesInfo[gTasks[taskId].move].name);
             AddTextPrinterDefault(buffer, BATTLE_TEXT_BOX, 4);
             gTasks[taskId].state++;
             break;
@@ -344,7 +398,7 @@ static void Task_Victory(int taskId) {
 
     switch (gTasks[taskId].state) {
     case 0:
-        sprintf(buffer, "You defeated %s", gBattleOpponent.info->name);
+        sprintf(buffer, "%s defeated %s", PLAYER_TEXT, gBattleOpponent.info->name);
         AddTextPrinterDefault(buffer, BATTLE_TEXT_BOX, 4);
         gSprites[sMonsterSpriteId].callback = sMonsterDefeatSpriteCB;
         gTasks[taskId].state++;
@@ -370,7 +424,7 @@ static void Task_VictoryReward(int taskId) {
     switch (gTasks[taskId].state) {
     case 0:
         AddItem(gBattleOpponent.info->item);
-        sprintf(buffer, "You got a %s", gItemsInfo[gBattleOpponent.info->item].name);
+        sprintf(buffer, "%s got a %s", PLAYER_TEXT, gItemsInfo[gBattleOpponent.info->item].name);
         AddTextPrinterDefault(buffer, BATTLE_TEXT_BOX, 4);
         gTasks[taskId].state++;
         break;
@@ -386,9 +440,12 @@ static void Task_VictoryReward(int taskId) {
 }
 
 static void Task_Defeat(int taskId) {
+    char buffer[24];
+
     switch (gTasks[taskId].state) {
     case 0:
-        AddTextPrinterDefault("You were defeated", BATTLE_TEXT_BOX, 4);
+        sprintf(buffer, "%s were defeated", PLAYER_TEXT);
+        AddTextPrinterDefault(buffer, BATTLE_TEXT_BOX, 4);
         gTasks[taskId].state++;
         gInBattle = false;
         break;
@@ -404,10 +461,13 @@ static void Task_Defeat(int taskId) {
 }
 
 static void Task_Flee(int taskId) {
+    char buffer[16];
+
     switch (gTasks[taskId].state) {
     case 0:
         if (GetRandomValue(0, gBattlePlayer.speed + gBattleOpponent.info->speed) < gBattlePlayer.speed) {
-            AddTextPrinterDefault("You ran away", BATTLE_TEXT_BOX, 4);
+            sprintf(buffer, "%s ran away", PLAYER_TEXT);
+            AddTextPrinterDefault(buffer, BATTLE_TEXT_BOX, 4);
             gTasks[taskId].state++;
             gInBattle = false;
         } else {

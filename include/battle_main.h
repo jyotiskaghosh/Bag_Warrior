@@ -12,7 +12,7 @@ typedef struct {
 
 typedef struct {
     char name[16];
-    char imageFilename[32];
+    int textureId;
     int move;
     int HP;
     int speed;
@@ -31,7 +31,7 @@ typedef struct {
     int speed;
 } BattlePlayer;
 
-enum{
+enum {
     PLAYER,
     OPPONENT
 };
@@ -40,7 +40,7 @@ extern bool gInBattle;
 extern BattleMonster gBattleOpponent;
 extern BattlePlayer gBattlePlayer;
 
-void CB_InitBattle();
-void CB_HandleBattle();
+void CB_InitBattle(void);
+void CB_HandleBattle(void);
 void Task_ActionSelection(int taskId);
 void Task_PlayMove(int taskId);

@@ -11,5 +11,5 @@
 extern int gLevel;
 extern int gMoney;
 
-void CB_NewLevel();
-void CB_LoadDungeon();
+void CB_NewLevel(void);
+void CB_LoadDungeon(void);

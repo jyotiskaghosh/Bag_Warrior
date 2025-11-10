@@ -10,10 +10,10 @@
 
 #define VICTORY_TEXT "YOU ESCAPED THE DUNGEON!"
 
-static void CB_HandleVictoryScreen();
+static void CB_HandleVictoryScreen(void);
 static void Task_VictoryScreenSelection(int taskId);
 
-static void DrawVictoryScreen() {
+static void DrawVictoryScreen(void) {
     DrawText(VICTORY_TEXT, VIRTUAL_WIDTH / 2 - MeasureText(VICTORY_TEXT, 16) / 2, VIRTUAL_HEIGHT / 2 - 16, 16, WHITE);
     
     char buffer[16];
@@ -21,7 +21,7 @@ static void DrawVictoryScreen() {
     DrawText(buffer, VIRTUAL_WIDTH / 2 - MeasureText(buffer, 16) / 2,  VIRTUAL_HEIGHT / 2 + 16 ,16, WHITE);
 } 
 
-void CB_InitVictoryScreen() {
+void CB_InitVictoryScreen(void) {
     StopAllTextPrinters();
     gMainCallback = CB_HandleVictoryScreen;
     CreateTask(Task_VictoryScreenSelection, 0);
@@ -34,7 +34,7 @@ static void Task_VictoryScreenSelection(int taskId) {
     }
 }
 
-static void CB_HandleVictoryScreen() {
+static void CB_HandleVictoryScreen(void) {
     DrawVictoryScreen();
     RunTasks();
 }

@@ -70,7 +70,7 @@ static void SortSprites(void) {
     }
 }
 
-int CreateSprite(const SpriteTemplate *template, const char *filename, Rectangle bounds, int priority) {
+int CreateSprite(const SpriteTemplate *template, Texture2D texture, Rectangle bounds, int priority) {
     for (int i = 0; i < MAX_SPRITES; i++)
         if (!gSprites[i].inUse) {
             Sprite *sprite = &gSprites[i];
@@ -83,7 +83,7 @@ int CreateSprite(const SpriteTemplate *template, const char *filename, Rectangle
 
             sprite->bounds = bounds;
 
-            sprite->texture = LoadTexture(filename);
+            sprite->texture = texture;
             sprite->anims = template->anims;
             sprite->callback = template->callback;
             sprite->width = template->width;
@@ -98,10 +98,8 @@ int CreateSprite(const SpriteTemplate *template, const char *filename, Rectangle
 }
 
 void DestroySprite(Sprite *sprite) {
-    if (sprite->inUse){
-        UnloadTexture(sprite->texture);
+    if (sprite->inUse)
         *sprite = (Sprite){};
-    }
 }
 
 static void DrawSprite(Sprite *sprite) {

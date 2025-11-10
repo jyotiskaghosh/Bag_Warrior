@@ -8,6 +8,12 @@ const Move gMovesInfo[] = {
         .damage = 3,
         .accuracy = 90,
     },
+    [MOVE_SUCK_BLOOD] = {
+        .name = "SUCK BLOOD",
+        .effect = EFFECT_ABSORB,
+        .damage = 2,
+        .accuracy = 90,
+    },
     [MOVE_THROWING_KNIFE] = {
         .name = "THROW KNIFE",
         .effect = EFFECT_HIT,

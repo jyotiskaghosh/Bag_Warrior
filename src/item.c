@@ -5,7 +5,7 @@
 #include "dungeon.h"
 #include "data.h"
 #include "victory_screen.h"
-#include "constants/item.h"
+#include "constants/items.h"
 #include "core/task.h"
 #include "core/text.h"
 #include <raylib.h>
@@ -14,10 +14,9 @@
 #define DESCRIPTION_BOX (Rectangle){VIRTUAL_WIDTH / 2, 28, VIRTUAL_WIDTH / 2, VIRTUAL_HEIGHT / 2}
 #define CONFIRMATION_BOX (Rectangle){VIRTUAL_WIDTH - 80, VIRTUAL_HEIGHT - 48, 80, 48}
 
-int ItemCount();
 static void RemoveItem(int index);
-static void CB_HandleBag();
-static void DrawBag();
+static void CB_HandleBag(void);
+static void DrawBag(void);
 static void Task_ItemSelection(int taskId);
 static void Task_InitItemCofirmation(int taskId);
 static void Task_ItemConfirmation(int taskId);
@@ -27,7 +26,7 @@ int gBag[BAG_CAPACITY];
 static int sItemSelectionCursor;
 static int sPage;
 
-int ItemCount() {
+int ItemCount(void) {
     int count = 0;
 
     for (int i = 0; i < BAG_CAPACITY; i++)
@@ -37,7 +36,7 @@ int ItemCount() {
     return count;
 }
 
-void EmptyBag() {
+void EmptyBag(void) {
     for (int i = 0; i < BAG_CAPACITY; i++)
         gBag[i] = ITEM_NONE;
 }
@@ -62,20 +61,20 @@ static void RemoveItem(int index) {
     }
 }
 
-void CB_OpenBag() {
+void CB_OpenBag(void) {
     StopAllTextPrinters();
     sItemSelectionCursor = 0;
     gMainCallback = CB_HandleBag;
     CreateTask(Task_ItemSelection, 0);
 }
 
-static void CB_HandleBag() {
+static void CB_HandleBag(void) {
     DrawBag();
     RunTextPrinters();
     RunTasks();
 }
 
-static void DrawBag() {
+static void DrawBag(void) {
     DrawText("BAG", 4, 4, 16, WHITE);
     DrawLine(0, 24, VIRTUAL_WIDTH, 24, WHITE);
     for (int i = 0; i < 10; i++)

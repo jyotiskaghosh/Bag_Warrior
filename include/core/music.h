@@ -5,4 +5,4 @@
 extern Music gCurrentMusic;
 
 void PlayMusic(Music music);
-void StopMusic();
+void StopMusic(void);

@@ -1,6 +1,6 @@
 #include "start_screen.h"
 
-#include "constants/item.h"
+#include "constants/items.h"
 #include "main.h"
 #include "core/task.h"
 #include "core/text.h"
@@ -15,15 +15,15 @@
 #define BUTTON_W 80
 #define BUTTON_H 24
 
-static void CB_HandleStartScreen();
+static void CB_HandleStartScreen(void);
 static void Task_StartScreenSelection(int taskId);
-static void InitBag();
+static void InitBag(void);
 
-static void DrawStartScreen() {
+static void DrawStartScreen(void) {
     DrawText(GAME_TITLE, VIRTUAL_WIDTH / 2 - MeasureText(GAME_TITLE, 32) / 2, VIRTUAL_HEIGHT * 1 / 4 - 16, 32, WHITE);
 } 
 
-void CB_InitStartScreen() {
+void CB_InitStartScreen(void) {
     gMainCallback = CB_HandleStartScreen;
     CreateTask(Task_StartScreenSelection, 0);
     AddTextPrinterDefault(
@@ -33,7 +33,7 @@ void CB_InitStartScreen() {
     );
 }
 
-static void CB_HandleStartScreen() {
+static void CB_HandleStartScreen(void) {
     DrawStartScreen();
     RunTextPrinters();
     RunTasks();
@@ -52,7 +52,7 @@ static void Task_StartScreenSelection(int taskId) {
 
 #undef cursor
 
-void CB_NewGame() {
+void CB_NewGame(void) {
     StopAllTextPrinters();
     gBattlePlayer = (BattlePlayer){10, 10, 5};
     gLevel = 0;
@@ -62,7 +62,7 @@ void CB_NewGame() {
     gMainCallback = CB_NewLevel;
 }
 
-static void InitBag() {
+static void InitBag(void) {
     EmptyBag();
 
     gBag[0] = ITEM_THROWING_KNIFE;

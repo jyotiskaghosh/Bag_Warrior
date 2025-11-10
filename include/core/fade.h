@@ -21,4 +21,4 @@ extern FadeController gFade;
 
 void StartFadeOut(Color color);
 void StartFadeIn(Color color);
-void RunFade();
+void RunFade(void);

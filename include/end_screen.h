@@ -1,3 +1,3 @@
 #pragma once
 
-void CB_InitEndScreen();
+void CB_InitEndScreen(void);
