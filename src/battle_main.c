@@ -268,27 +268,31 @@ void Task_PlayMove(int taskId) {
     case 0:
         switch (gMovesInfo[gTasks[taskId].move].effect) {
         case EFFECT_HIT:
-            // accuracy check
-            if (!(GetRandomValue(0, 100) < gMovesInfo[gTasks[taskId].move].accuracy)) {
-                if (gTasks[taskId].user == PLAYER)
-                    strcpy(userText, PLAYER_TEXT);
-                else 
-                    strcpy(userText, gBattleOpponent.info->name);
 
-                sprintf(buffer, "%s used %s\nIt missed", userText, gMovesInfo[gTasks[taskId].move].name);
-                AddTextPrinterDefault(buffer, BATTLE_TEXT_BOX, 4);
-                gTasks[taskId].state = 2;
-                break;
-            }
+#define accuracyCheck()                                                                             \
+    if (!(GetRandomValue(0, 100) < gMovesInfo[gTasks[taskId].move].accuracy)) {                     \
+        if (gTasks[taskId].user == PLAYER)                                                          \
+            strcpy(userText, PLAYER_TEXT);                                                          \
+        else                                                                                        \
+            strcpy(userText, gBattleOpponent.info->name);                                           \
+        sprintf(buffer, "%s used %s\nIt missed", userText, gMovesInfo[gTasks[taskId].move].name);   \
+        AddTextPrinterDefault(buffer, BATTLE_TEXT_BOX, 4);                                          \
+        gTasks[taskId].state = 2;                                                                   \
+        break;                                                                                      \
+    }                                                                                               
+
+            accuracyCheck()
 
             if (gTasks[taskId].user == PLAYER) {
                 float mod = 1; // damage modifier
 
-                if (gBattleOpponent.info->weakness & gMovesInfo[gTasks[taskId].move].flags)
-                    mod = 2;
+#define damageModifier()                                                            \
+    if (gBattleOpponent.info->weakness & gMovesInfo[gTasks[taskId].move].flags)     \
+        mod = 2;                                                                    \
+    if (gBattleOpponent.info->resistance & gMovesInfo[gTasks[taskId].move].flags)   \
+        mod = 0.5;
 
-                if (gBattleOpponent.info->resistance & gMovesInfo[gTasks[taskId].move].flags)
-                    mod = 0.5;
+                damageModifier()
 
                 Damage(OPPONENT, (int)(gMovesInfo[gTasks[taskId].move].damage * mod));
                 strcpy(userText, PLAYER_TEXT);
@@ -313,27 +317,12 @@ void Task_PlayMove(int taskId) {
             gTasks[taskId].state++;
             break;
         case EFFECT_ABSORB:
-            // accuracy check
-            if (!(GetRandomValue(0, 100) < gMovesInfo[gTasks[taskId].move].accuracy)) {
-                if (gTasks[taskId].user == PLAYER)
-                    strcpy(userText, PLAYER_TEXT);
-                else 
-                    strcpy(userText, gBattleOpponent.info->name);
-
-                sprintf(buffer, "%s used %s\nIt missed", userText, gMovesInfo[gTasks[taskId].move].name);
-                AddTextPrinterDefault(buffer, BATTLE_TEXT_BOX, 4);
-                gTasks[taskId].state = 2;
-                break;
-            }
+            accuracyCheck()
 
             if (gTasks[taskId].user == PLAYER) {
                 float mod = 1; // damage modifier
 
-                if (gBattleOpponent.info->weakness & gMovesInfo[gTasks[taskId].move].flags)
-                    mod = 2;
-
-                if (gBattleOpponent.info->resistance & gMovesInfo[gTasks[taskId].move].flags)
-                    mod = 0.5;
+                damageModifier()
 
                 int damage = (int)(gMovesInfo[gTasks[taskId].move].damage * mod);
                 Damage(OPPONENT, damage);

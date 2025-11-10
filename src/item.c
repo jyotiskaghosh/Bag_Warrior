@@ -63,7 +63,6 @@ static void RemoveItem(int index) {
 
 void CB_OpenBag(void) {
     StopAllTextPrinters();
-    sItemSelectionCursor = 0;
     gMainCallback = CB_HandleBag;
     CreateTask(Task_ItemSelection, 0);
 }
@@ -126,7 +125,8 @@ static void Task_ItemSelection(int taskId) {
     }
 
     if (IsKeyPressed(KEY_DOWN)) {
-        int temp = sItemSelectionCursor;
+        int prevCursor = sItemSelectionCursor;
+        int prevPage = sPage;
 
         if (++sItemSelectionCursor >= ITEMS_PER_PAGE) {
             if (sPage == 3) {
@@ -137,8 +137,10 @@ static void Task_ItemSelection(int taskId) {
             }
         }
 
-        if (gBag[sItemSelectionCursor + sPage * ITEMS_PER_PAGE] == ITEM_NONE)
-            sItemSelectionCursor = temp;
+        if (gBag[sItemSelectionCursor + sPage * ITEMS_PER_PAGE] == ITEM_NONE) {
+            sItemSelectionCursor = prevCursor;
+            sPage = prevPage;
+        }
     }
 
     DrawText(">", 0, 28 + sItemSelectionCursor * 12, 8, WHITE);
@@ -202,7 +204,7 @@ static void Task_ItemConfirmation(int taskId) {
                 sItemSelectionCursor = 0;
             } else {
                 sPage--;
-                sItemSelectionCursor = ITEMS_PER_PAGE;
+                sItemSelectionCursor = ITEMS_PER_PAGE - 1;
             }
         }
         StopAllTextPrinters();
