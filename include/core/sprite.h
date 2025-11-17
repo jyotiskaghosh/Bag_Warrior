@@ -76,3 +76,4 @@ void ResetAllSprites(void);
 void AnimateSprites(void);
 int CreateSprite(const SpriteTemplate *template, Texture2D texture, Rectangle bounds, int priority);
 void DestroySprite(Sprite *sprite);
+void DummySpriteCallback(Sprite *s);

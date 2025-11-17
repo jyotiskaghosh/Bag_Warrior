@@ -1,7 +1,6 @@
 #include "end_screen.h"
 
 #include "core/task.h"
-#include "core/text.h"
 #include "main.h"
 #include "start_screen.h"
 #include <raylib.h>
@@ -16,7 +15,6 @@ static void DrawEndScreen(void) {
 } 
 
 void CB_InitEndScreen(void) {
-    StopAllTextPrinters();
     gMainCallback = CB_HandleEndScreen;
     CreateTask(Task_EndScreenSelection, 0);
 }

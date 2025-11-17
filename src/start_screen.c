@@ -24,6 +24,9 @@ static void DrawStartScreen(void) {
 } 
 
 void CB_InitStartScreen(void) {
+    // reset
+    StopAllTextPrinters();
+
     gMainCallback = CB_HandleStartScreen;
     CreateTask(Task_StartScreenSelection, 0);
     AddTextPrinterDefault(
@@ -53,7 +56,6 @@ static void Task_StartScreenSelection(int taskId) {
 #undef cursor
 
 void CB_NewGame(void) {
-    StopAllTextPrinters();
     gBattlePlayer = (BattlePlayer){10, 10, 5};
     gLevel = 0;
     gMoney = 0;

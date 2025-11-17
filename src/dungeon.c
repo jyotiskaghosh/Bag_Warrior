@@ -1,10 +1,12 @@
 #include "dungeon.h"
 
-#include "core/task.h"
 #include "battle_main.h"
 #include "item.h"
+#include "core/task.h"
 #include "core/text.h"
+#include "core/sprite.h"
 #include "constants/items.h"
+#include "constants/textures.h"
 #include "data.h"
 #include <raylib.h>
 #include <stdlib.h>
@@ -18,6 +20,10 @@ typedef struct {
     int x, y, w, h; // position and size
     bool exists;     // 1 if the room exists
 } Room;
+
+typedef struct {
+    int layer1[MAP_H][MAP_W], layer2[MAP_H][MAP_W];
+} Map;
 
 static struct RoomNode {
     bool conn[MAX_ROOMS];
@@ -47,7 +53,27 @@ enum {
     TILE_EMPTY,
     TILE_FLOOR,
     TILE_STAIR,
-    TILE_CHEST
+    TILE_CHEST,
+    TILE_CHEST_CLOSED
+};
+
+static const AnimCmd sPlayerAnim[] = {
+    ANIMCMD_FRAME(0, 0, 8),
+    ANIMCMD_FRAME(16, 0, 8),
+    ANIMCMD_FRAME(32, 0, 8),
+    ANIMCMD_FRAME(48, 0, 8),
+    ANIMCMD_JUMP(0),
+};
+
+static const AnimCmd *const sPlayerAnims[] = {
+    sPlayerAnim,
+};
+
+static const SpriteTemplate sPlayerTemplate = {
+    .width = 16,
+    .height = 16,
+    .anims = sPlayerAnims,
+    .callback = DummySpriteCallback,
 };
 
 static void CB_HandleDungeon(void);
@@ -60,7 +86,7 @@ static void Task_OpenChest(int taskId);
 int gLevel;
 int gMoney;
 
-static int sMap[MAP_H][MAP_W];
+static Map sMap;
 static Room sRooms[MAX_ROOMS];
 static Coordinates sPlayerPos;
 static Camera2D sCamera;
@@ -70,8 +96,10 @@ static bool sIsFieldControlLocked;
 // Fill map with walls
 static void ClearMap(void) {
     for (int y = 0; y < MAP_H; y++)
-        for (int x = 0; x < MAP_W; x++)
-            sMap[y][x] = TILE_EMPTY;
+        for (int x = 0; x < MAP_W; x++) {
+            sMap.layer1[y][x] = TILE_EMPTY;
+            sMap.layer2[y][x] = TILE_EMPTY;
+        }
 }
 
 static void GenerateRooms(void) {
@@ -127,7 +155,7 @@ static Coordinates RandomPos(Room *r) {
 static void CarveRoom(Room r) {
     for (int y = r.y; y < r.y + r.h; y++)
         for (int x = r.x; x < r.x + r.w; x++)
-            sMap[y][x] = TILE_FLOOR;
+            sMap.layer1[y][x] = TILE_FLOOR;
 }
 
 static void GeneratePassages(void) {
@@ -257,8 +285,8 @@ static void ConnectRooms(int r1, int r2) {
 
     turn_spot = GetRandomValue(0, distance - 2) + 1; // where turn starts
 
-    sMap[spos.y][spos.x] = TILE_FLOOR;
-    sMap[epos.y][epos.x] = TILE_FLOOR;
+    sMap.layer1[spos.y][spos.x] = TILE_FLOOR;
+    sMap.layer1[epos.y][epos.x] = TILE_FLOOR;
 
     // get ready to move...
     curr.x = spos.x;
@@ -272,12 +300,12 @@ static void ConnectRooms(int r1, int r2) {
         // check if we are at the turn place, if so we the turn
         if (distance == turn_spot) {
             while (turn_distance--) {
-                sMap[curr.y][curr.x] = TILE_FLOOR;
+                sMap.layer1[curr.y][curr.x] = TILE_FLOOR;
                 curr.x += turn_delta.x;
 	        	curr.y += turn_delta.y;
             }
         }
-        sMap[curr.y][curr.x] = TILE_FLOOR;
+        sMap.layer1[curr.y][curr.x] = TILE_FLOOR;
         distance--;
     }
 }
@@ -289,37 +317,50 @@ static Coordinates FindFloor(void) {
 
 static void PutStair(void) {
     Coordinates c = FindFloor();
-    sMap[c.y][c.x] = TILE_STAIR;
+    sMap.layer2[c.y][c.x] = TILE_STAIR;
 }
 
 static void PutChests(void) {
 #define MAX_CHESTS 9
     for (int i = 0; i < MAX_CHESTS; i++) {
             Coordinates c = FindFloor();
-            sMap[c.y][c.x] = TILE_CHEST;
+            sMap.layer2[c.y][c.x] = TILE_CHEST;
         }
+}
+
+#define FLOOR (Rectangle){TILE_SIZE, TILE_SIZE, TILE_SIZE, TILE_SIZE}
+#define STAIR (Rectangle){0, 5 * TILE_SIZE, TILE_SIZE, TILE_SIZE}
+#define CHEST (Rectangle){3 * TILE_SIZE, 3 * TILE_SIZE, TILE_SIZE, TILE_SIZE}
+#define CHEST_CLOSED (Rectangle){3 * TILE_SIZE, 4 * TILE_SIZE, TILE_SIZE, TILE_SIZE}
+
+static void DrawTile(int tile, int y, int x) { 
+    Rectangle dest = {x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE};    
+
+    switch (tile) {                                                                    
+    case TILE_EMPTY: 
+        break; 
+    case TILE_FLOOR: 
+        DrawTexturePro(gTextures[TEX_DUNGEON_TILESET], FLOOR, dest, (Vector2){0, 0}, 0, WHITE); 
+        break;
+    case TILE_STAIR: 
+        DrawTexturePro(gTextures[TEX_DUNGEON_TILESET], STAIR, dest, (Vector2){0, 0}, 0, WHITE); 
+        break;
+    case TILE_CHEST: 
+        DrawTexturePro(gTextures[TEX_DUNGEON_TILESET], CHEST, dest, (Vector2){0, 0}, 0, WHITE); 
+        break;
+    case TILE_CHEST_CLOSED: 
+        DrawTexturePro(gTextures[TEX_DUNGEON_TILESET], CHEST_CLOSED, dest, (Vector2){0, 0}, 0, WHITE); 
+        break;
+    default: 
+        break;
+    }  
 }
 
 static void DrawMap(void) {
     for (int y = 0; y < MAP_H; y++)
         for (int x = 0; x < MAP_W; x++) {
-            switch (sMap[y][x])
-            {
-            case TILE_EMPTY:
-                DrawText(" ", x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, WHITE);
-                break;
-            case TILE_FLOOR:
-                DrawText(".", x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, WHITE);
-                break;
-            case TILE_STAIR:
-                DrawText("S", x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, WHITE);
-                break;
-            case TILE_CHEST:
-                DrawText("C", x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, WHITE);
-                break;
-            default:
-                break;
-            }
+            DrawTile(sMap.layer1[y][x], y, x); 
+            DrawTile(sMap.layer2[y][x], y, x);
         }
 }
 
@@ -335,7 +376,6 @@ static void DrawCameraView(void) {
 
     BeginMode2D(sCamera);
         DrawMap();
-        DrawText("@", sPlayerPos.x * TILE_SIZE, sPlayerPos.y * TILE_SIZE, TILE_SIZE, WHITE);
     EndMode2D();
 
     DrawRectangleRec(INFO_BAR, BLACK);
@@ -357,7 +397,7 @@ static void Task_HandleOverworld(int taskId) {
     if (sIsFieldControlLocked) return;
 
     if (IsKeyPressed(KEY_UP)) {
-        if (sPlayerPos.y - 1 >= 0 && sMap[sPlayerPos.y - 1][sPlayerPos.x] != TILE_EMPTY) {
+        if (sPlayerPos.y - 1 >= 0 && sMap.layer1[sPlayerPos.y - 1][sPlayerPos.x] != TILE_EMPTY) {
             sPlayerPos.y--;
 
             goto doMovementActions;
@@ -365,7 +405,7 @@ static void Task_HandleOverworld(int taskId) {
     }
 
     if (IsKeyPressed(KEY_DOWN)) {
-        if (sPlayerPos.y + 1 < MAP_H && sMap[sPlayerPos.y + 1][sPlayerPos.x] != TILE_EMPTY) {
+        if (sPlayerPos.y + 1 < MAP_H && sMap.layer1[sPlayerPos.y + 1][sPlayerPos.x] != TILE_EMPTY) {
             sPlayerPos.y++;
 
             goto doMovementActions;
@@ -373,7 +413,7 @@ static void Task_HandleOverworld(int taskId) {
     } 
 
     if (IsKeyPressed(KEY_LEFT)) {
-        if (sPlayerPos.x - 1 >= 0 && sMap[sPlayerPos.y][sPlayerPos.x - 1] != TILE_EMPTY) {
+        if (sPlayerPos.x - 1 >= 0 && sMap.layer1[sPlayerPos.y][sPlayerPos.x - 1] != TILE_EMPTY) {
             sPlayerPos.x--;
 
             goto doMovementActions;
@@ -381,7 +421,7 @@ static void Task_HandleOverworld(int taskId) {
     }
 
     if (IsKeyPressed(KEY_RIGHT)) {
-        if (sPlayerPos.x + 1 < MAP_W && sMap[sPlayerPos.y][sPlayerPos.x + 1] != TILE_EMPTY) {
+        if (sPlayerPos.x + 1 < MAP_W && sMap.layer1[sPlayerPos.y][sPlayerPos.x + 1] != TILE_EMPTY) {
             sPlayerPos.x++;
 
             goto doMovementActions;
@@ -396,14 +436,14 @@ static void Task_HandleOverworld(int taskId) {
     return;
 
     doMovementActions:
-        switch (sMap[sPlayerPos.y][sPlayerPos.x]) {
+        switch (sMap.layer2[sPlayerPos.y][sPlayerPos.x]) {
         case TILE_STAIR:
             gMainCallback = CB_NewLevel;
             DestroyTask(taskId);
             return;
         case TILE_CHEST:
             CreateTask(Task_OpenChest, 0);
-            sMap[sPlayerPos.y][sPlayerPos.x] = TILE_FLOOR;
+            sMap.layer2[sPlayerPos.y][sPlayerPos.x] = TILE_CHEST_CLOSED;
             return;
         }
 
@@ -481,31 +521,44 @@ static void Task_OpenChest(int taskId) {
     }
 }
 
-#undef state
+#define PLAYER_BOUNDS (Rectangle){VIRTUAL_WIDTH/2 + TILE_SIZE/2, VIRTUAL_HEIGHT/2 + TILE_SIZE/2, TILE_SIZE, TILE_SIZE}
 
 void CB_NewLevel(void) {
+    // reset
+    ResetAllSprites();
+    StopAllTextPrinters();
+
     gLevel++;
 
     ClearMap();
+
     GenerateRooms();
     GeneratePassages();
 
-    PutStair();
     PutChests();
+    PutStair();
     sPlayerPos = FindFloor();  
     
     gMainCallback = CB_HandleDungeon;
     CreateTask(Task_HandleOverworld, 0);
+
+    CreateSprite(&sPlayerTemplate, gTextures[TEX_PLAYER], PLAYER_BOUNDS, 0);
 }
 
 void CB_LoadDungeon(void) {
+    // reset
+    ResetAllSprites();
     StopAllTextPrinters();
-    CreateTask(Task_HandleOverworld, 0);
+    
     gMainCallback = CB_HandleDungeon;
+    CreateTask(Task_HandleOverworld, 0);
+
+    CreateSprite(&sPlayerTemplate, gTextures[TEX_PLAYER], PLAYER_BOUNDS, 0);
 }
 
 static void CB_HandleDungeon(void) {
     DrawCameraView();
+    AnimateSprites();
     RunTextPrinters();
     RunTasks();
 }

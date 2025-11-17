@@ -7,14 +7,14 @@
 const Monster gMonstersInfo[] = {
     [MONSTER_WOLF] = {
         .name = "WOLF",
-        .textureId = TEXTURE_WOLF,
+        .textureId = TEX_WOLF,
         .HP = 5,
         .speed = 5,
         .move = MOVE_BITE,
     },
     [MONSTER_BAT] = {
         .name = "BAT",
-        .textureId = TEXTURE_BAT,
+        .textureId = TEX_BAT,
         .HP = 3,
         .speed = 7,
         .move = MOVE_SUCK_BLOOD,
@@ -22,7 +22,7 @@ const Monster gMonstersInfo[] = {
     },
     [MONSTER_EARTH_MAGE] = {
         .name = "EARTH MAGE",
-        .textureId = TEXTURE_EARTH_MAGE,
+        .textureId = TEX_EARTH_MAGE,
         .HP = 6,
         .speed = 4,
         .move = MOVE_EARTH_SPELL,
@@ -32,7 +32,7 @@ const Monster gMonstersInfo[] = {
     },
     [MONSTER_AIR_MAGE] = {
         .name = "AIR MAGE",
-        .textureId = TEXTURE_AIR_MAGE,
+        .textureId = TEX_AIR_MAGE,
         .HP = 6,
         .speed = 4,
         .move = MOVE_AIR_SPELL,
@@ -42,7 +42,7 @@ const Monster gMonstersInfo[] = {
     },
     [MONSTER_WATER_MAGE] = {
         .name = "WATER MAGE",
-        .textureId = TEXTURE_WATER_MAGE,
+        .textureId = TEX_WATER_MAGE,
         .HP = 6,
         .speed = 4,
         .move = MOVE_WATER_SPELL,
@@ -52,7 +52,7 @@ const Monster gMonstersInfo[] = {
     },
     [MONSTER_FIRE_MAGE] = {
         .name = "FIRE MAGE",
-        .textureId = TEXTURE_FIRE_MAGE,
+        .textureId = TEX_FIRE_MAGE,
         .HP = 6,
         .speed = 4,
         .move = MOVE_FIRE_SPELL,
@@ -62,7 +62,7 @@ const Monster gMonstersInfo[] = {
     },
     [MONSTER_DRAGON] = {
         .name = "DRAGON",
-        .textureId = TEXTURE_DRAGON,
+        .textureId = TEX_DRAGON,
         .HP = 16,
         .speed = 4,
         .move = MOVE_DRAGON_FIRE,

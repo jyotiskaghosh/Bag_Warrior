@@ -230,3 +230,5 @@ static void JumpToTopOfAnimLoop(Sprite *sprite) {
         sprite->animCmdIndex--;
     }
 }
+
+void DummySpriteCallback(Sprite *s) {}

@@ -4,7 +4,7 @@
 #include "constants/textures.h"
 
 void (*gMainCallback)(void);
-Texture2D gTextures[TEXTURE_COUNT];
+Texture2D gTextures[TEX_COUNT];
 
 static void LoadTextures(void);
 static void UnloadTextures(void);
@@ -54,16 +54,23 @@ int main(void) {
 }
 
 static void LoadTextures(void) {
-	gTextures[TEXTURE_WOLF] = LoadTexture("graphics/Wolf.png");
-	gTextures[TEXTURE_BAT] = LoadTexture("graphics/Bat.png");
-	gTextures[TEXTURE_EARTH_MAGE] = LoadTexture("graphics/EarthMage.png");
-	gTextures[TEXTURE_AIR_MAGE] = LoadTexture("graphics/AirMage.png");
-	gTextures[TEXTURE_WATER_MAGE] = LoadTexture("graphics/WaterMage.png");
-	gTextures[TEXTURE_FIRE_MAGE] = LoadTexture("graphics/FireMage.png");
-	gTextures[TEXTURE_DRAGON] = LoadTexture("graphics/Dragon.png");
+	// monster textures
+	gTextures[TEX_WOLF] = LoadTexture("graphics/Wolf.png");
+	gTextures[TEX_BAT] = LoadTexture("graphics/Bat.png");
+	gTextures[TEX_EARTH_MAGE] = LoadTexture("graphics/EarthMage.png");
+	gTextures[TEX_AIR_MAGE] = LoadTexture("graphics/AirMage.png");
+	gTextures[TEX_WATER_MAGE] = LoadTexture("graphics/WaterMage.png");
+	gTextures[TEX_FIRE_MAGE] = LoadTexture("graphics/FireMage.png");
+	gTextures[TEX_DRAGON] = LoadTexture("graphics/Dragon.png");
+
+	// dungeon tileset
+	gTextures[TEX_DUNGEON_TILESET] = LoadTexture("graphics/DungeonTileset.png");
+
+	// player
+	gTextures[TEX_PLAYER] = LoadTexture("graphics/Player.png");
 }
 
 static void UnloadTextures(void) {
-	for (int i = 0; i < TEXTURE_COUNT; i++)
+	for (int i = 0; i < TEX_COUNT; i++)
 		UnloadTexture(gTextures[i]);
 }

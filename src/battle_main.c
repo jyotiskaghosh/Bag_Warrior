@@ -42,10 +42,8 @@ static const AnimCmd *const sMonsterAnims[] = {
     sMonsterAnim,
 };
 
-static void sDummySpriteCallback(Sprite *s) {}
-
-static void sMonsterDefeatSpriteCB(Sprite *s) {
-    s->bounds.y += 0.1;
+static void MonsterDefeatSpriteCB(Sprite *s) {
+    s->bounds.y += 4;
 
     if (s->bounds.y > VIRTUAL_HEIGHT)
         DestroySprite(s);
@@ -55,7 +53,7 @@ static const SpriteTemplate sMonsterTemplate = {
     .width = 64,
     .height = 64,
     .anims = sMonsterAnims,
-    .callback = sDummySpriteCallback,
+    .callback = DummySpriteCallback,
 };
 
 typedef struct {
@@ -104,6 +102,9 @@ static int GetRandomMonster(void) {
 }
 
 void CB_InitBattle(void) {
+    // reset
+    ResetAllSprites();
+
     gInBattle = true;
 
     int monster = GetRandomMonster();
@@ -260,8 +261,8 @@ static void Damage(int user, int HP) {
 #define move data[2]
 
 void Task_PlayMove(int taskId) {
-#define accuracyCheck()                                                                             \
-    if (!(GetRandomValue(0, 100) <= gMovesInfo[gTasks[taskId].move].accuracy)) {                     \
+#define AccuracyCheck()                                                                             \
+    if (!(GetRandomValue(0, 100) <= gMovesInfo[gTasks[taskId].move].accuracy)) {                    \
         if (gTasks[taskId].user == PLAYER)                                                          \
             strcpy(userText, PLAYER_TEXT);                                                          \
         else                                                                                        \
@@ -272,7 +273,7 @@ void Task_PlayMove(int taskId) {
         break;                                                                                      \
     }                
 
-#define damageModifier()                                                            \
+#define DamageModifier()                                                            \
     if (gBattleOpponent.info->weakness & gMovesInfo[gTasks[taskId].move].flags)     \
         mod = 2;                                                                    \
     if (gBattleOpponent.info->resistance & gMovesInfo[gTasks[taskId].move].flags)   \
@@ -286,12 +287,12 @@ void Task_PlayMove(int taskId) {
     case 0:
         switch (gMovesInfo[gTasks[taskId].move].effect) {
         case EFFECT_HIT:
-            accuracyCheck()
+            AccuracyCheck()
 
             if (gTasks[taskId].user == PLAYER) {
                 float mod = 1; // damage modifier
 
-                damageModifier()
+                DamageModifier()
 
                 Damage(OPPONENT, (int)(gMovesInfo[gTasks[taskId].move].damage * mod));
                 strcpy(userText, PLAYER_TEXT);
@@ -316,12 +317,12 @@ void Task_PlayMove(int taskId) {
             gTasks[taskId].state++;
             break;
         case EFFECT_ABSORB:
-            accuracyCheck()
+            AccuracyCheck()
 
             if (gTasks[taskId].user == PLAYER) {
                 float mod = 1; // damage modifier
 
-                damageModifier()
+                DamageModifier()
 
                 int damage = (int)(gMovesInfo[gTasks[taskId].move].damage * mod);
                 Damage(OPPONENT, damage);
@@ -388,7 +389,7 @@ static void Task_Victory(int taskId) {
     case 0:
         sprintf(buffer, "%s defeated %s", PLAYER_TEXT, gBattleOpponent.info->name);
         AddTextPrinterDefault(buffer, BATTLE_TEXT_BOX, 4);
-        gSprites[sMonsterSpriteId].callback = sMonsterDefeatSpriteCB;
+        gSprites[sMonsterSpriteId].callback = MonsterDefeatSpriteCB;
         gTasks[taskId].state++;
         gInBattle = false;
         break;
