@@ -260,17 +260,8 @@ static void Damage(int user, int HP) {
 #define move data[2]
 
 void Task_PlayMove(int taskId) {
-    char buffer[64];
-    char userText[16];
-
-    switch (gTasks[taskId].state)
-    {
-    case 0:
-        switch (gMovesInfo[gTasks[taskId].move].effect) {
-        case EFFECT_HIT:
-
 #define accuracyCheck()                                                                             \
-    if (!(GetRandomValue(0, 100) < gMovesInfo[gTasks[taskId].move].accuracy)) {                     \
+    if (!(GetRandomValue(0, 100) <= gMovesInfo[gTasks[taskId].move].accuracy)) {                     \
         if (gTasks[taskId].user == PLAYER)                                                          \
             strcpy(userText, PLAYER_TEXT);                                                          \
         else                                                                                        \
@@ -279,18 +270,26 @@ void Task_PlayMove(int taskId) {
         AddTextPrinterDefault(buffer, BATTLE_TEXT_BOX, 4);                                          \
         gTasks[taskId].state = 2;                                                                   \
         break;                                                                                      \
-    }                                                                                               
-
-            accuracyCheck()
-
-            if (gTasks[taskId].user == PLAYER) {
-                float mod = 1; // damage modifier
+    }                
 
 #define damageModifier()                                                            \
     if (gBattleOpponent.info->weakness & gMovesInfo[gTasks[taskId].move].flags)     \
         mod = 2;                                                                    \
     if (gBattleOpponent.info->resistance & gMovesInfo[gTasks[taskId].move].flags)   \
         mod = 0.5;
+
+    char buffer[64];
+    char userText[16];
+
+    switch (gTasks[taskId].state)
+    {
+    case 0:
+        switch (gMovesInfo[gTasks[taskId].move].effect) {
+        case EFFECT_HIT:
+            accuracyCheck()
+
+            if (gTasks[taskId].user == PLAYER) {
+                float mod = 1; // damage modifier
 
                 damageModifier()
 

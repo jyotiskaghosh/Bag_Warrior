@@ -8,7 +8,7 @@ LDFLAGS = -lraylib
 # Emscripten settings
 EMCC = emcc
 EMCFLAGS = -I$(HOME)/raylib/src -Iinclude -DPLATFORM_WEB
-EMLDFLAGS = -s USE_GLFW=3 -s ASYNCIFY -s FULL_ES3=1 -s ERROR_ON_UNDEFINED_SYMBOLS=0
+EMLDFLAGS = -s USE_GLFW=3 -s ASYNCIFY -s FULL_ES3=1 -s ERROR_ON_UNDEFINED_SYMBOLS=0 --preload-file graphics
 RAYLIB = $(HOME)/raylib/src/libraylib.a
 
 # Directories

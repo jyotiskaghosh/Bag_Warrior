@@ -52,13 +52,23 @@ void AddItem(int item) {
 static void RemoveItem(int index) {
     for (int i = index; i < BAG_CAPACITY; i++) {
         if (gBag[i] == ITEM_NONE)
-            return;
+            goto shiftCursorUp;
         if (i == BAG_CAPACITY - 1) {
             gBag[i] = ITEM_NONE;
-            return;
+            goto shiftCursorUp;
         }
         gBag[i] = gBag[i + 1];
     }
+    shiftCursorUp:
+        // shift cursor up
+        if (--sItemSelectionCursor < 0) {
+            if (sPage == 0) {
+                sItemSelectionCursor = 0;
+            } else {
+                sPage--;
+                sItemSelectionCursor = ITEMS_PER_PAGE - 1;
+            }
+        }
 }
 
 void CB_OpenBag(void) {
@@ -198,15 +208,6 @@ static void Task_ItemConfirmation(int taskId) {
     return; 
 
     itemSelection:
-        // shift cursor up
-        if (--sItemSelectionCursor < 0) {
-            if (sPage == 0) {
-                sItemSelectionCursor = 0;
-            } else {
-                sPage--;
-                sItemSelectionCursor = ITEMS_PER_PAGE - 1;
-            }
-        }
         StopAllTextPrinters();
         gTasks[taskId].func = Task_ItemSelection;
 }

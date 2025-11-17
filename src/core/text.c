@@ -27,7 +27,7 @@ int AddTextPrinter(const TextPrinterTemplate *template, int framesPerChar) {
 }
 
 static void UpdateTextPrinter(TextPrinter *printer) {
-    if (printer->done || !printer->template.text || printer->framesPerChar == 0) return;
+    if (printer->done || printer->template.text[0] == '\0' || printer->framesPerChar == 0) return;
 
     printer->frameCounter++;
     if (printer->frameCounter >= printer->framesPerChar) {
@@ -77,7 +77,7 @@ void StopAllTextPrinters(void) {
 }
 
 void AddTextPrinterDefault(const char * str, Rectangle box, int framesPerChar) {
-    const TextPrinterTemplate template = {
+    TextPrinterTemplate template = {
         .box = box,
         .padding = 4,
         .font = FONT_DEFAULT,
@@ -87,7 +87,9 @@ void AddTextPrinterDefault(const char * str, Rectangle box, int framesPerChar) {
         .textColor = WHITE
     };
 
-    strcpy(template.text, str);
+    /* Safely copy the provided string into the template buffer. */
+    strncpy(template.text, str, sizeof(template.text) - 1);
+    template.text[sizeof(template.text) - 1] = '\0';
 
-    AddTextPrinter(&template, framesPerChar); 
+    AddTextPrinter(&template, framesPerChar);
 }
