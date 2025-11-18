@@ -9,7 +9,7 @@
 #define ROOM_COLS 3
 
 extern int gLevel;
-extern int gMoney;
+extern int gGold;
 
 void CB_NewLevel(void);
 void CB_LoadDungeon(void);

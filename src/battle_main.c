@@ -81,11 +81,11 @@ static MonsterEncounter sEncounterTable2[] = {
     {MONSTER_DRAGON, 5}
 };
 
+#define MONSTER_COUNT 7
+
 static int GetRandomMonster(void) {
     int totalWeight = 0;
     MonsterEncounter *table = gLevel < 3 ? sEncounterTable1 : sEncounterTable2;
-
-#define MONSTER_COUNT 7
 
     for (int i = 0; i < MONSTER_COUNT; i++)
         totalWeight += table[i].rarity;
@@ -174,8 +174,6 @@ static void Task_EncounterText(int taskId) {
             DestroyTask(taskId);
         }
         break;
-    default:
-        break;
     }
 }
 
@@ -262,7 +260,7 @@ static void Damage(int user, int HP) {
 
 void Task_PlayMove(int taskId) {
 #define AccuracyCheck()                                                                             \
-    if (!(GetRandomValue(0, 100) <= gMovesInfo[gTasks[taskId].move].accuracy)) {                    \
+    if (!(GetRandomValue(1, 100) <= gMovesInfo[gTasks[taskId].move].accuracy)) {                    \
         if (gTasks[taskId].user == PLAYER)                                                          \
             strcpy(userText, PLAYER_TEXT);                                                          \
         else                                                                                        \
@@ -339,8 +337,6 @@ void Task_PlayMove(int taskId) {
             AddTextPrinterDefault(buffer, BATTLE_TEXT_BOX, 4);
             gTasks[taskId].state++;
             break;
-        default:
-            break;
         }
         break;
     case 1:
@@ -374,8 +370,6 @@ void Task_PlayMove(int taskId) {
             DestroyTask(taskId);
         }
         break;
-    default:
-        break;
     }
 }
 
@@ -402,8 +396,6 @@ static void Task_Victory(int taskId) {
                 gMainCallback = CB_LoadDungeon;
         }
         break;
-    default:
-        break;
     }
 }
 
@@ -422,8 +414,6 @@ static void Task_VictoryReward(int taskId) {
             DestroyTask(taskId);
             gMainCallback = CB_LoadDungeon;
         }
-        break;
-    default:
         break;
     }
 }
@@ -444,8 +434,6 @@ static void Task_Defeat(int taskId) {
             gMainCallback = CB_InitEndScreen;
         }
         break;
-    default:
-        break;
     }
 }
 
@@ -454,7 +442,7 @@ static void Task_Flee(int taskId) {
 
     switch (gTasks[taskId].state) {
     case 0:
-        if (GetRandomValue(0, gBattlePlayer.speed + gBattleOpponent.info->speed) < gBattlePlayer.speed) {
+        if (GetRandomValue(1, gBattlePlayer.speed + gBattleOpponent.info->speed) <= gBattlePlayer.speed) {
             sprintf(buffer, "%s ran away", PLAYER_TEXT);
             AddTextPrinterDefault(buffer, BATTLE_TEXT_BOX, 4);
             gTasks[taskId].state++;
@@ -476,8 +464,6 @@ static void Task_Flee(int taskId) {
             CreateTask(Task_OpponentPlaysMove, 0);
             DestroyTask(taskId);
         }
-        break;
-    default:
         break;
     }
 }

@@ -17,7 +17,7 @@ static void DrawVictoryScreen(void) {
     DrawText(VICTORY_TEXT, VIRTUAL_WIDTH / 2 - MeasureText(VICTORY_TEXT, 16) / 2, VIRTUAL_HEIGHT / 2 - 16, 16, WHITE);
     
     char buffer[16];
-    sprintf(buffer, "money: %d", gMoney);
+    sprintf(buffer, "GOLD: %d", gGold);
     DrawText(buffer, VIRTUAL_WIDTH / 2 - MeasureText(buffer, 16) / 2,  VIRTUAL_HEIGHT / 2 + 16 ,16, WHITE);
 } 
 

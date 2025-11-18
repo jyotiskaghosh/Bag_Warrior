@@ -58,7 +58,7 @@ static void Task_StartScreenSelection(int taskId) {
 void CB_NewGame(void) {
     gBattlePlayer = (BattlePlayer){10, 10, 5};
     gLevel = 0;
-    gMoney = 0;
+    gGold = 0;
     InitBag();
 
     gMainCallback = CB_NewLevel;

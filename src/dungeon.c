@@ -54,7 +54,10 @@ enum {
     TILE_FLOOR,
     TILE_STAIR,
     TILE_CHEST,
-    TILE_CHEST_CLOSED
+    TILE_CHEST_CLOSED,
+    TILE_COINS,
+    TILE_BONE,
+    TILE_SKULL
 };
 
 static const AnimCmd sPlayerAnim[] = {
@@ -82,9 +85,10 @@ static Coordinates RandomPos(Room *r);
 static void CarveRoom(Room r);
 static void ConnectRooms(int r1, int r2);
 static void Task_OpenChest(int taskId);
+static void Task_PickCoins(int taskId);
 
 int gLevel;
-int gMoney;
+int gGold;
 
 static Map sMap;
 static Room sRooms[MAX_ROOMS];
@@ -320,11 +324,47 @@ static void PutStair(void) {
     sMap.layer2[c.y][c.x] = TILE_STAIR;
 }
 
-static void PutChests(void) {
 #define MAX_CHESTS 9
-    for (int i = 0; i < MAX_CHESTS; i++) {
+#define CHEST_CHANCE 80
+
+static void PutChests(void) {
+    for (int i = 0; i < MAX_CHESTS; i++) 
+        if (GetRandomValue(1, 100) <= CHEST_CHANCE) {
             Coordinates c = FindFloor();
             sMap.layer2[c.y][c.x] = TILE_CHEST;
+        }
+}
+
+#define MAX_COINS 9
+#define COIN_CHANCE 50
+
+static void PutCoins(void) {
+    for (int i = 0; i < MAX_COINS; i++) 
+        if (GetRandomValue(1, 100) <= COIN_CHANCE) {
+            Coordinates c = FindFloor();
+            sMap.layer2[c.y][c.x] = TILE_COINS;
+        }
+}
+
+#define MAX_BONES 9
+#define BONES_CHANCE 50
+
+static void PutBones(void) {
+    for (int i = 0; i < MAX_BONES; i++) 
+        if (GetRandomValue(1, 100) <= BONES_CHANCE) {
+            Coordinates c = FindFloor();
+            sMap.layer2[c.y][c.x] = TILE_BONE;
+        }
+}
+
+#define MAX_SKULL 9
+#define SKULL_CHANCE 30
+
+static void PutSkull(void) {
+    for (int i = 0; i < MAX_SKULL; i++) 
+        if (GetRandomValue(1, 100) <= SKULL_CHANCE) {
+            Coordinates c = FindFloor();
+            sMap.layer2[c.y][c.x] = TILE_SKULL;
         }
 }
 
@@ -332,6 +372,9 @@ static void PutChests(void) {
 #define STAIR (Rectangle){0, 5 * TILE_SIZE, TILE_SIZE, TILE_SIZE}
 #define CHEST (Rectangle){3 * TILE_SIZE, 3 * TILE_SIZE, TILE_SIZE, TILE_SIZE}
 #define CHEST_CLOSED (Rectangle){3 * TILE_SIZE, 4 * TILE_SIZE, TILE_SIZE, TILE_SIZE}
+#define COINS (Rectangle){4 * TILE_SIZE, 3 * TILE_SIZE, TILE_SIZE, TILE_SIZE}
+#define BONES (Rectangle){4 * TILE_SIZE, 2 * TILE_SIZE, TILE_SIZE, TILE_SIZE}
+#define SKULL (Rectangle){2 * TILE_SIZE, 4 * TILE_SIZE, TILE_SIZE, TILE_SIZE}
 
 static void DrawTile(int tile, int y, int x) { 
     Rectangle dest = {x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE};    
@@ -351,7 +394,14 @@ static void DrawTile(int tile, int y, int x) {
     case TILE_CHEST_CLOSED: 
         DrawTexturePro(gTextures[TEX_DUNGEON_TILESET], CHEST_CLOSED, dest, (Vector2){0, 0}, 0, WHITE); 
         break;
-    default: 
+    case TILE_COINS: 
+        DrawTexturePro(gTextures[TEX_DUNGEON_TILESET], COINS, dest, (Vector2){0, 0}, 0, WHITE); 
+        break;
+    case TILE_BONE: 
+        DrawTexturePro(gTextures[TEX_DUNGEON_TILESET], BONES, dest, (Vector2){0, 0}, 0, WHITE); 
+        break;
+    case TILE_SKULL: 
+        DrawTexturePro(gTextures[TEX_DUNGEON_TILESET], SKULL, dest, (Vector2){0, 0}, 0, WHITE); 
         break;
     }  
 }
@@ -384,10 +434,10 @@ static void DrawCameraView(void) {
     sprintf(buffer, "HP: %d / %d", gBattlePlayer.HP, gBattlePlayer.maxHP);
     DrawText(buffer, 4, 4, 8, WHITE);
 
-    sprintf(buffer, "Money: %d", gMoney);
+    sprintf(buffer, "GOLD: %d", gGold);
     DrawText(buffer, VIRTUAL_WIDTH * 1 / 3, 4, 8, WHITE);
 
-    sprintf(buffer, "Level: %d", gLevel);
+    sprintf(buffer, "LEVEL: %d", gLevel);
     DrawText(buffer, VIRTUAL_WIDTH * 2 / 3, 4, 8, WHITE);
 }
 
@@ -445,16 +495,20 @@ static void Task_HandleOverworld(int taskId) {
             CreateTask(Task_OpenChest, 0);
             sMap.layer2[sPlayerPos.y][sPlayerPos.x] = TILE_CHEST_CLOSED;
             return;
+        case TILE_COINS:
+            CreateTask(Task_PickCoins, 0);
+            sMap.layer2[sPlayerPos.y][sPlayerPos.x] = TILE_EMPTY;
+            return;
         }
 
-        if (GetRandomValue(0, 100) < ENCOUNTER_RATE) {
+        if (GetRandomValue(1, 100) <= ENCOUNTER_RATE) {
             DestroyTask(taskId);
             gMainCallback = CB_InitBattle;
         }
 }
 
 #define state data[0]
-#define MAX_CHEST_MONEY 1000
+#define MAX_CHEST_GOLD 1000
 #define TEXT_BOX (Rectangle){60, VIRTUAL_HEIGHT * 3/4, 200, VIRTUAL_HEIGHT * 1/4}
 
 typedef struct {
@@ -491,21 +545,21 @@ static int GetRandomItem(void) {
 
 static void Task_OpenChest(int taskId) {
     char buffer[52];
-    int money = 0;
+    int gold = 0;
     int item = 0;
 
     switch (gTasks[taskId].state) {
     case 0:
         sIsFieldControlLocked = true;
 
-        money = GetRandomValue(0, MAX_CHEST_MONEY);
-        gMoney += money; 
+        gold = GetRandomValue(0, MAX_CHEST_GOLD);
+        gGold += gold; 
 
         item = GetRandomItem();
 
         AddItem(item);
 
-        sprintf(buffer, "You got %d money\nYou got a %s", money, gItemsInfo[item].name);
+        sprintf(buffer, "You got %d gold\nYou got a %s", gold, gItemsInfo[item].name);
         AddTextPrinterDefault(buffer, TEXT_BOX, 4);
         gTasks[taskId].state++;
         break;
@@ -516,7 +570,33 @@ static void Task_OpenChest(int taskId) {
             DestroyTask(taskId);
         }
         break;
-    default:
+    }
+}
+
+#define MIN_COINS_GOLD 4
+#define MAX_COINS_GOLD 100
+
+static void Task_PickCoins(int taskId) {
+    char buffer[32];
+    int gold = 0;
+
+    switch (gTasks[taskId].state) {
+    case 0:
+        sIsFieldControlLocked = true;
+
+        gold = GetRandomValue(MIN_COINS_GOLD, MAX_COINS_GOLD);
+        gGold += gold; 
+
+        sprintf(buffer, "You got %d gold\n", gold);
+        AddTextPrinterDefault(buffer, TEXT_BOX, 4);
+        gTasks[taskId].state++;
+        break;
+    case 1:
+        if (IsKeyPressed(KEY_Z) || IsKeyPressed(KEY_X)) {
+            sIsFieldControlLocked = false;
+            StopAllTextPrinters();
+            DestroyTask(taskId);
+        }
         break;
     }
 }
@@ -535,6 +615,9 @@ void CB_NewLevel(void) {
     GenerateRooms();
     GeneratePassages();
 
+    PutSkull();
+    PutBones();
+    PutCoins();
     PutChests();
     PutStair();
     sPlayerPos = FindFloor();  
