@@ -5,6 +5,7 @@
 #include "core/task.h"
 #include "core/text.h"
 #include "core/sprite.h"
+#include "core/fade.h"
 #include "constants/items.h"
 #include "constants/textures.h"
 #include "data.h"
@@ -84,6 +85,8 @@ static int RandomRoom(void);
 static Coordinates RandomPos(Room *r);
 static void CarveRoom(Room r);
 static void ConnectRooms(int r1, int r2);
+static void Task_FadeToBattle(int taskId);
+static void Task_FadeToNewLevel(int taskId);
 static void Task_OpenChest(int taskId);
 static void Task_PickCoins(int taskId);
 
@@ -488,8 +491,8 @@ static void Task_HandleOverworld(int taskId) {
     doMovementActions:
         switch (sMap.layer2[sPlayerPos.y][sPlayerPos.x]) {
         case TILE_STAIR:
-            gMainCallback = CB_NewLevel;
             DestroyTask(taskId);
+            CreateTask(Task_FadeToNewLevel, 0);
             return;
         case TILE_CHEST:
             CreateTask(Task_OpenChest, 0);
@@ -503,11 +506,20 @@ static void Task_HandleOverworld(int taskId) {
 
         if (GetRandomValue(1, 100) <= ENCOUNTER_RATE) {
             DestroyTask(taskId);
-            gMainCallback = CB_InitBattle;
+            CreateTask(Task_FadeToBattle, 0);
         }
 }
 
 #define state data[0]
+
+static void Task_FadeToBattle(int taskId) {
+    Transition(CB_InitBattle)
+}
+
+static void Task_FadeToNewLevel(int taskId) {
+    Transition(CB_NewLevel)    
+}
+
 #define MAX_CHEST_GOLD 1000
 #define TEXT_BOX (Rectangle){60, VIRTUAL_HEIGHT * 3/4, 200, VIRTUAL_HEIGHT * 1/4}
 
@@ -626,6 +638,9 @@ void CB_NewLevel(void) {
     CreateTask(Task_HandleOverworld, 0);
 
     CreateSprite(&sPlayerTemplate, gTextures[TEX_PLAYER], PLAYER_BOUNDS, 0);
+
+    // run fade for this frame
+    RunFade();
 }
 
 void CB_LoadDungeon(void) {
@@ -637,6 +652,9 @@ void CB_LoadDungeon(void) {
     CreateTask(Task_HandleOverworld, 0);
 
     CreateSprite(&sPlayerTemplate, gTextures[TEX_PLAYER], PLAYER_BOUNDS, 0);
+
+    // run fade for this frame
+    RunFade();
 }
 
 static void CB_HandleDungeon(void) {
@@ -644,4 +662,5 @@ static void CB_HandleDungeon(void) {
     AnimateSprites();
     RunTextPrinters();
     RunTasks();
+    RunFade();
 }

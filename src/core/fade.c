@@ -39,7 +39,6 @@ void RunFade(void) {
         }
     }
 
-    if (gFade.active)
-        DrawRectangle(0, 0, VIRTUAL_WIDTH, VIRTUAL_HEIGHT, Fade(gFade.color, gFade.alpha));
+    DrawRectangle(0, 0, VIRTUAL_WIDTH, VIRTUAL_HEIGHT, Fade(gFade.color, gFade.alpha));
 }
 

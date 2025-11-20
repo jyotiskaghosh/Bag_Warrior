@@ -1,4 +1,4 @@
 #pragma once
 
-void CB_NewGame(void);
+void Task_NewGame(int taskId);
 void CB_InitStartScreen(void);

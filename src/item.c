@@ -8,6 +8,7 @@
 #include "constants/items.h"
 #include "core/task.h"
 #include "core/text.h"
+#include "core/fade.h"
 #include <raylib.h>
 
 #define ITEMS_PER_PAGE 10
@@ -20,6 +21,7 @@ static void DrawBag(void);
 static void Task_ItemSelection(int taskId);
 static void Task_InitItemCofirmation(int taskId);
 static void Task_ItemConfirmation(int taskId);
+static void Task_FadeToVictoryScreen(int taskId);
 
 int gBag[BAG_CAPACITY];
 
@@ -81,6 +83,7 @@ static void CB_HandleBag(void) {
     DrawBag();
     RunTextPrinters();
     RunTasks();
+    RunFade();
 }
 
 static void DrawBag(void) {
@@ -176,7 +179,7 @@ static void Task_ItemConfirmation(int taskId) {
                 break;
             case ITEM_EFFECT_ESCAPE:
                 DestroyTask(taskId);
-                gMainCallback = CB_InitVictoryScreen;
+                CreateTask(Task_FadeToVictoryScreen, 0);
                 break;
             default:
                 return;
@@ -212,4 +215,6 @@ static void Task_ItemConfirmation(int taskId) {
         gTasks[taskId].func = Task_ItemSelection;
 }
 
-#undef cursor
+static void Task_FadeToVictoryScreen(int taskId) {
+    Transition(CB_InitVictoryScreen)
+}

@@ -7,6 +7,7 @@
 #include "core/text.h"
 #include "core/task.h"
 #include "core/sprite.h"
+#include "core/fade.h"
 #include "item.h"
 #include "dungeon.h"
 #include "end_screen.h"
@@ -27,6 +28,8 @@ static void Task_Victory(int taskId);
 static void Task_VictoryReward(int taskId);
 static void Task_Defeat(int taskId);
 static void Task_Flee(int taskId);
+static void Task_FadeToDungeon(int taskId);
+static void Task_FadeToEndScreen(int taskId);
 
 bool gInBattle;
 BattlePlayer gBattlePlayer;
@@ -118,6 +121,9 @@ void CB_InitBattle(void) {
     sMonsterSpriteId = CreateSprite(&sMonsterTemplate, gTextures[gMonstersInfo[monster].textureId], MONSTER_SPRITE_BOX, 0);
 
     gMainCallback = CB_HandleBattle;
+
+    // run fade
+    RunFade();
 }
 
 void CB_HandleBattle(void) {
@@ -125,6 +131,7 @@ void CB_HandleBattle(void) {
     AnimateSprites();
     RunTextPrinters();
     RunTasks();
+    RunFade();
 }
 
 #define PLAYER_HEALTHBOX (Rectangle){0, 0, 100, 32}
@@ -393,7 +400,7 @@ static void Task_Victory(int taskId) {
             if (gBattleOpponent.info->item) 
                 CreateTask(Task_VictoryReward, 0);
             else 
-                gMainCallback = CB_LoadDungeon;
+                CreateTask(Task_FadeToDungeon, 0);
         }
         break;
     }
@@ -412,7 +419,7 @@ static void Task_VictoryReward(int taskId) {
     case 1:
         if (IsKeyPressed(KEY_Z) || IsKeyPressed(KEY_X)) {
             DestroyTask(taskId);
-            gMainCallback = CB_LoadDungeon;
+            CreateTask(Task_FadeToDungeon, 0);
         }
         break;
     }
@@ -431,7 +438,7 @@ static void Task_Defeat(int taskId) {
     case 1:
         if (IsKeyPressed(KEY_Z) || IsKeyPressed(KEY_X)) {
             DestroyTask(taskId);
-            gMainCallback = CB_InitEndScreen;
+            CreateTask(Task_FadeToEndScreen, 0);
         }
         break;
     }
@@ -455,7 +462,7 @@ static void Task_Flee(int taskId) {
     case 1:
         if (IsKeyPressed(KEY_Z) || IsKeyPressed(KEY_X)) {
             DestroyTask(taskId);
-            gMainCallback = CB_LoadDungeon;
+            CreateTask(Task_FadeToDungeon, 0);
         }
         break;
     case 2:
@@ -468,3 +475,10 @@ static void Task_Flee(int taskId) {
     }
 }
 
+static void Task_FadeToDungeon(int taskId) {
+    Transition(CB_LoadDungeon)
+}
+
+static void Task_FadeToEndScreen(int taskId) {
+    Transition(CB_InitEndScreen)
+}
