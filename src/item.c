@@ -6,6 +6,7 @@
 #include "data.h"
 #include "victory_screen.h"
 #include "constants/items.h"
+#include "constants/textures.h"
 #include "core/task.h"
 #include "core/text.h"
 #include "core/fade.h"
@@ -90,7 +91,7 @@ static void DrawBag(void) {
     DrawText("BAG", 4, 4, 16, WHITE);
     DrawLine(0, 24, VIRTUAL_WIDTH, 24, WHITE);
     for (int i = 0; i < 10; i++)
-        DrawText(gItemsInfo[gBag[i + sPage * ITEMS_PER_PAGE]].name, 4, 28 + i * 12, 8, WHITE);
+        DrawText(gItemsInfo[gBag[i + sPage * ITEMS_PER_PAGE]].name, 10, 28 + i * 12, 8, WHITE);
 
     DrawRectangleLinesEx(DESCRIPTION_BOX, 1, WHITE);
     DrawText(gItemsInfo[gBag[sItemSelectionCursor + sPage * ITEMS_PER_PAGE]].description, DESCRIPTION_BOX.x + 4, DESCRIPTION_BOX.y + 4, 8, WHITE);
@@ -156,7 +157,7 @@ static void Task_ItemSelection(int taskId) {
         }
     }
 
-    DrawText(">", 0, 28 + sItemSelectionCursor * 12, 8, WHITE);
+    DrawTexture(gTextures[TEX_CURSOR],  0, 28 + sItemSelectionCursor * 12, WHITE);
 }
 
 static void Task_InitItemCofirmation(int taskId) {
@@ -206,8 +207,7 @@ static void Task_ItemConfirmation(int taskId) {
         if (++gTasks[taskId].cursor > 1)
             gTasks[taskId].cursor = 1;
 
-    DrawText(">", CONFIRMATION_BOX.x - 8, gTasks[taskId].cursor == 0 ? CONFIRMATION_BOX.y + 4 : CONFIRMATION_BOX.y + 19, 8, WHITE);
-
+    DrawTexture(gTextures[TEX_CURSOR], CONFIRMATION_BOX.x - 8, gTasks[taskId].cursor == 0 ? CONFIRMATION_BOX.y + 4 : CONFIRMATION_BOX.y + 19, WHITE);
     return; 
 
     itemSelection:

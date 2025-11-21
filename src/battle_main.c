@@ -4,6 +4,7 @@
 #include "main.h"
 #include "constants/monsters.h"
 #include "constants/moves.h"
+#include "constants/textures.h"
 #include "core/text.h"
 #include "core/task.h"
 #include "core/sprite.h"
@@ -225,7 +226,7 @@ void Task_ActionSelection(int taskId) {
             if (++gTasks[taskId].cursor > 1)
                 gTasks[taskId].cursor = 1;
 
-        DrawText(">", 60 - 4, gTasks[taskId].cursor == 0 ? VIRTUAL_HEIGHT * 3/4 + 4 : VIRTUAL_HEIGHT * 3/4 + 19, 8, WHITE);
+        DrawTexture(gTextures[TEX_CURSOR], 60 - 8, gTasks[taskId].cursor == 0 ? VIRTUAL_HEIGHT * 3/4 + 4 : VIRTUAL_HEIGHT * 3/4 + 19, WHITE);
         break;
     }
 }

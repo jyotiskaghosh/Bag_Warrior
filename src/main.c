@@ -68,6 +68,9 @@ static void LoadTextures(void) {
 
 	// player
 	gTextures[TEX_PLAYER] = LoadTexture("graphics/Player.png");
+
+	//cursor
+	gTextures[TEX_CURSOR] = LoadTexture("graphics/Cursor.png");
 }
 
 static void UnloadTextures(void) {

@@ -1,6 +1,7 @@
 #include "start_screen.h"
 
 #include "constants/items.h"
+#include "constants/textures.h"
 #include "main.h"
 #include "core/task.h"
 #include "core/text.h"
@@ -21,8 +22,18 @@ static void Task_StartScreenSelection(int taskId);
 static void InitBag(void);
 static void Task_FadeToNewGame(int taskId);
 
+static void DrawButton(char *text, Rectangle rec, int fontSize) {
+    DrawRectangleLines(rec.x, rec.y, rec.width, rec.height, WHITE);
+    DrawText(text, (rec.x + rec.width/2) - MeasureText(text, fontSize)/2, rec.y + rec.height/2 - fontSize/2, fontSize, WHITE);
+}
+
 static void DrawStartScreen(void) {
     DrawText(GAME_TITLE, VIRTUAL_WIDTH / 2 - MeasureText(GAME_TITLE, 32) / 2, VIRTUAL_HEIGHT * 1 / 4 - 16, 32, WHITE);
+    DrawButton(
+        NEW_GAME_TEXT, 
+        (Rectangle){VIRTUAL_WIDTH / 2 - BUTTON_W / 2, VIRTUAL_HEIGHT / 2 - BUTTON_H / 2, BUTTON_W, BUTTON_H},
+        8
+    );
 } 
 
 void CB_InitStartScreen(void) {
@@ -31,11 +42,6 @@ void CB_InitStartScreen(void) {
 
     gMainCallback = CB_HandleStartScreen;
     CreateTask(Task_StartScreenSelection, 0);
-    AddTextPrinterDefault(
-        NEW_GAME_TEXT,
-        (Rectangle){VIRTUAL_WIDTH / 2 - BUTTON_W / 2, VIRTUAL_HEIGHT / 2 - BUTTON_H / 2, BUTTON_W, BUTTON_H},
-        0
-    );
 
     // run fade for this frame
     RunFade();
@@ -56,7 +62,7 @@ static void Task_StartScreenSelection(int taskId) {
         CreateTask(Task_NewGame, 0);
     }
 
-    DrawText(">", VIRTUAL_WIDTH / 2 - BUTTON_W / 2 - 8, VIRTUAL_HEIGHT / 2 - BUTTON_H / 2, 16, WHITE);
+    DrawTexture(gTextures[TEX_CURSOR],  VIRTUAL_WIDTH / 2 - BUTTON_W / 2 - 8, VIRTUAL_HEIGHT / 2 - 4, WHITE);
 }
 
 #undef cursor

@@ -214,6 +214,34 @@ static void GeneratePassages(void) {
             roomCount++;
         }
     } while (roomCount < MAX_ROOMS);
+
+    /*
+     * attempt to add passages to the graph a random number of times so
+     * that there isn't always just one unique passage through it.
+     */
+    for (roomCount = GetRandomValue(0, 4); roomCount > 0; roomCount--)
+    {
+        r1 = &sRoomGraph[GetRandomValue(0, MAX_ROOMS - 1)];	/* a random room to look from */
+        /*
+        * find an adjacent room not already connected
+        */
+        j = 0;
+        for (i = 0; i < MAX_ROOMS; i++)
+            if (r1->conn[i] && !r1->isConn[i] && GetRandomValue(0, ++j - 1) == 0)
+                r2 = &sRoomGraph[i];
+        /*
+        * if there is one, connect it and look for the next added
+        * passage
+        */
+        if (j != 0)
+        {
+            i = (int)(r1 - sRoomGraph);
+            j = (int)(r2 - sRoomGraph);
+            ConnectRooms(i, j);
+            r1->isConn[j] = true;
+            r2->isConn[i] = true;
+        }
+    }
 }
 
 static void ConnectRooms(int r1, int r2) {

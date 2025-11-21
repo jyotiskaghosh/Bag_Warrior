@@ -10,5 +10,6 @@ enum {
     TEX_DRAGON,
     TEX_DUNGEON_TILESET,
     TEX_PLAYER,
+    TEX_CURSOR,
     TEX_COUNT
 };
