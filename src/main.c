@@ -8,6 +8,7 @@
 void (*gMainCallback)(void);
 Texture2D gTextures[TEX_COUNT];
 Music gMusic[MUSIC_COUNT];
+Sound gSounds[SOUND_COUNT];
 
 static void LoadResources(void);
 static void UnloadResources(void);
@@ -77,8 +78,19 @@ static void LoadResources(void) {
 	gTextures[TEX_CURSOR] = LoadTexture("graphics/Cursor.png");
 
 	// *************** Audio *****************
-	gMusic[MUSIC_DUNGEON] = LoadMusicStream("audio/827900__expiredsoda__treasure-island-8-bit-adventure-loop-var1.wav");
+
+	// music
+	gMusic[MUSIC_DUNGEON] = LoadMusicStream("audio/WATCH OUT.mp3");
 	gMusic[MUSIC_BATTLE] = LoadMusicStream("audio/647908__sonically_sound__short-loop-made-in-a-few-minutes-with-qws-and-goldwave.wav");
+
+	// sounds
+	gSounds[SOUND_CHEST_OPEN] = LoadSound("audio/771164__steprock__treasure-chest-open.mp3");
+	SetSoundVolume(gSounds[SOUND_CHEST_OPEN], 5.0);
+
+	gSounds[SOUND_COINS] = LoadSound("audio/drop-coin-384921.mp3");
+	gSounds[SOUND_SELECT] = LoadSound("audio/select-sound-121244.mp3");
+	
+	gSounds[SOUND_FADE] = LoadSound("audio/swoosh-1-376872.mp3");
 }
 
 static void UnloadResources(void) {
@@ -87,4 +99,7 @@ static void UnloadResources(void) {
 
 	for (int i = 0; i < MUSIC_COUNT; i++)
 		UnloadMusicStream(gMusic[i]);
+
+	for (int i = 0; i < SOUND_COUNT; i++)
+		UnloadSound(gSounds[i]);
 }

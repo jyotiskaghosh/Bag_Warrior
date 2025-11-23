@@ -6,6 +6,8 @@
 #include "main.h"
 #include "start_screen.h"
 #include "dungeon.h"
+#include "constants/audio.h"
+#include "util.h"
 #include <raylib.h>
 #include <stdio.h>
 
@@ -31,6 +33,8 @@ void CB_InitVictoryScreen(void) {
 
 static void Task_VictoryScreenSelection(int taskId) {
     if (IsKeyPressed(KEY_X) || IsKeyPressed(KEY_Z) || IsKeyPressed(KEY_ENTER)) {
+        PlaySound(gSounds[SOUND_SELECT]);        
+
         DestroyTask(taskId);
         CreateTask(Task_FadeToStartScreen, 0);
     }

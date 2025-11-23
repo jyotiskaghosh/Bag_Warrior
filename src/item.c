@@ -7,9 +7,11 @@
 #include "victory_screen.h"
 #include "constants/items.h"
 #include "constants/textures.h"
+#include "constants/audio.h"
 #include "core/task.h"
 #include "core/text.h"
 #include "core/fade.h"
+#include "util.h"
 #include <raylib.h>
 
 #define ITEMS_PER_PAGE 10
@@ -98,6 +100,8 @@ static void DrawBag(void) {
 
 static void Task_ItemSelection(int taskId) {
     if (IsKeyPressed(KEY_X)) {
+        PlaySound(gSounds[SOUND_SELECT]);
+        
         if (gInBattle) {
             gMainCallback = CB_HandleBattle;
             gTasks[taskId].func = Task_PlayMove;
@@ -168,6 +172,8 @@ static void Task_InitItemCofirmation(int taskId) {
 
 static void Task_ItemConfirmation(int taskId) {
     if (IsKeyPressed(KEY_X)) {
+        PlaySound(gSounds[SOUND_SELECT]);
+        
         if (gTasks[taskId].cursor == 0) {
             Item item = gItemsInfo[gBag[sItemSelectionCursor + sPage * ITEMS_PER_PAGE]];
 

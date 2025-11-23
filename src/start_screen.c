@@ -2,13 +2,16 @@
 
 #include "constants/items.h"
 #include "constants/textures.h"
+#include "constants/audio.h"
 #include "main.h"
 #include "core/task.h"
 #include "core/text.h"
 #include "core/fade.h"
+#include "core/music.h"
 #include "dungeon.h"
 #include "battle_main.h"
 #include "item.h"
+#include "util.h"
 #include <raylib.h>
 
 #define GAME_TITLE "BAG WARRIOR"
@@ -56,6 +59,8 @@ static void Task_StartScreenSelection(int taskId) {
     if (IsKeyPressed(KEY_X) || IsKeyPressed(KEY_ENTER)) {
         DestroyTask(taskId);
         CreateTask(Task_NewGame, 0);
+
+        PlaySound(gSounds[SOUND_SELECT]);
     }
 
     DrawTexture(gTextures[TEX_CURSOR],  VIRTUAL_WIDTH / 2 - BUTTON_W / 2 - 8, VIRTUAL_HEIGHT / 2 - 4, WHITE);

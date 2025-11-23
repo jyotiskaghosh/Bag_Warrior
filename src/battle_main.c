@@ -14,6 +14,7 @@
 #include "item.h"
 #include "dungeon.h"
 #include "end_screen.h"
+#include "util.h"
 #include <raylib.h>
 #include <stdio.h>
 #include <string.h>
@@ -208,6 +209,8 @@ void Task_ActionSelection(int taskId) {
         break;
     case 1:
         if (IsKeyPressed(KEY_X)) {
+            PlaySound(gSounds[SOUND_SELECT]);
+
             if (gTasks[taskId].cursor == 0) {
                 if (!ItemCount()) return;
                 gMainCallback = CB_OpenBag;

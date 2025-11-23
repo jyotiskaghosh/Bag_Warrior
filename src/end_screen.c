@@ -4,6 +4,8 @@
 #include "core/fade.h"
 #include "main.h"
 #include "start_screen.h"
+#include "constants/audio.h"
+#include "util.h"
 #include <raylib.h>
 
 #define DIED_TEXT "YOU DIED!"
@@ -23,6 +25,8 @@ void CB_InitEndScreen(void) {
 
 static void Task_EndScreenSelection(int taskId) {
     if (IsKeyPressed(KEY_X) || IsKeyPressed(KEY_Z) || IsKeyPressed(KEY_ENTER)) {
+        PlaySound(gSounds[SOUND_SELECT]);
+    
         DestroyTask(taskId);
         CreateTask(Task_FadeToStartScreen, 0);
     }

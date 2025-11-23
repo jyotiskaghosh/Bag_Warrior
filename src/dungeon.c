@@ -11,6 +11,7 @@
 #include "constants/textures.h"
 #include "constants/audio.h"
 #include "data.h"
+#include "util.h"
 #include <raylib.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -101,6 +102,7 @@ static Coordinates sPlayerPos;
 static Camera2D sCamera;
 
 static bool sIsFieldControlLocked;
+static bool sInDungeon;
 
 // Fill map with walls
 static void ClearMap(void) {
@@ -535,6 +537,8 @@ static void Task_HandleOverworld(int taskId) {
         }
 
         if (GetRandomValue(1, 100) <= ENCOUNTER_RATE) {
+            sInDungeon = false;        
+
             DestroyTask(taskId);
             CreateTask(Task_FadeToBattle, 0);
         }
@@ -603,6 +607,9 @@ static void Task_OpenChest(int taskId) {
 
         sprintf(buffer, "You got %d gold\nYou got a %s", gold, gItemsInfo[item].name);
         AddTextPrinterDefault(buffer, TEXT_BOX, 4);
+
+        PlaySound(gSounds[SOUND_CHEST_OPEN]);
+
         gTasks[taskId].state++;
         break;
     case 1:
@@ -631,6 +638,9 @@ static void Task_PickCoins(int taskId) {
 
         sprintf(buffer, "You got %d gold\n", gold);
         AddTextPrinterDefault(buffer, TEXT_BOX, 4);
+
+        PlaySound(gSounds[SOUND_COINS]);
+
         gTasks[taskId].state++;
         break;
     case 1:
@@ -649,6 +659,8 @@ void CB_NewLevel(void) {
     // reset
     ResetAllSprites();
     StopAllTextPrinters();
+
+    sInDungeon = true;
 
     gLevel++;
 
@@ -682,7 +694,10 @@ void CB_LoadDungeon(void) {
 
     CreateSprite(&sPlayerTemplate, gTextures[TEX_PLAYER], PLAYER_BOUNDS, 0);
 
-    PlayMusic(gMusic[MUSIC_DUNGEON]);
+    if (!sInDungeon)
+        PlayMusic(gMusic[MUSIC_DUNGEON]);
+
+    sInDungeon = true;
 }
 
 static void CB_HandleDungeon(void) {
