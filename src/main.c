@@ -1,20 +1,23 @@
 #include "main.h"
 #include "core/music.h"
+#include "core/fade.h"
 #include "start_screen.h"
 #include "constants/textures.h"
+#include "constants/audio.h"
 
 void (*gMainCallback)(void);
 Texture2D gTextures[TEX_COUNT];
+Music gMusic[MUSIC_COUNT];
 
-static void LoadTextures(void);
-static void UnloadTextures(void);
+static void LoadResources(void);
+static void UnloadResources(void);
 
 int main(void) {
 	InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Bag Warrior");
 
 	InitAudioDevice();
 
-	LoadTextures();
+	LoadResources();
 
 	RenderTexture2D virtualScreen = LoadRenderTexture(VIRTUAL_WIDTH, VIRTUAL_HEIGHT);
 
@@ -26,6 +29,7 @@ int main(void) {
 		BeginTextureMode(virtualScreen);
 			ClearBackground(BLACK);
 			gMainCallback();
+			RunFade();
 		EndTextureMode();
 
 		UpdateMusicStream(gCurrentMusic);
@@ -46,14 +50,14 @@ int main(void) {
 		EndDrawing();
 	}
 
-	UnloadTextures();
+	UnloadResources();
 
 	CloseAudioDevice();
 
 	CloseWindow();
 }
 
-static void LoadTextures(void) {
+static void LoadResources(void) {
 	// monster textures
 	gTextures[TEX_WOLF] = LoadTexture("graphics/Wolf.png");
 	gTextures[TEX_BAT] = LoadTexture("graphics/Bat.png");
@@ -71,9 +75,16 @@ static void LoadTextures(void) {
 
 	//cursor
 	gTextures[TEX_CURSOR] = LoadTexture("graphics/Cursor.png");
+
+	// *************** Audio *****************
+	gMusic[MUSIC_DUNGEON] = LoadMusicStream("audio/827900__expiredsoda__treasure-island-8-bit-adventure-loop-var1.wav");
+	gMusic[MUSIC_BATTLE] = LoadMusicStream("audio/647908__sonically_sound__short-loop-made-in-a-few-minutes-with-qws-and-goldwave.wav");
 }
 
-static void UnloadTextures(void) {
+static void UnloadResources(void) {
 	for (int i = 0; i < TEX_COUNT; i++)
 		UnloadTexture(gTextures[i]);
+
+	for (int i = 0; i < MUSIC_COUNT; i++)
+		UnloadMusicStream(gMusic[i]);
 }

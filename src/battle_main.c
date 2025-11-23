@@ -5,10 +5,12 @@
 #include "constants/monsters.h"
 #include "constants/moves.h"
 #include "constants/textures.h"
+#include "constants/audio.h"
 #include "core/text.h"
 #include "core/task.h"
 #include "core/sprite.h"
 #include "core/fade.h"
+#include "core/music.h"
 #include "item.h"
 #include "dungeon.h"
 #include "end_screen.h"
@@ -123,8 +125,7 @@ void CB_InitBattle(void) {
 
     gMainCallback = CB_HandleBattle;
 
-    // run fade
-    RunFade();
+    PlayMusic(gMusic[MUSIC_BATTLE]);
 }
 
 void CB_HandleBattle(void) {
@@ -132,7 +133,6 @@ void CB_HandleBattle(void) {
     AnimateSprites();
     RunTextPrinters();
     RunTasks();
-    RunFade();
 }
 
 #define PLAYER_HEALTHBOX (Rectangle){0, 0, 100, 32}

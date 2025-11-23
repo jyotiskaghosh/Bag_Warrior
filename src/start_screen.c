@@ -42,16 +42,12 @@ void CB_InitStartScreen(void) {
 
     gMainCallback = CB_HandleStartScreen;
     CreateTask(Task_StartScreenSelection, 0);
-
-    // run fade for this frame
-    RunFade();
 }
 
 static void CB_HandleStartScreen(void) {
     DrawStartScreen();
     RunTextPrinters();
     RunTasks();
-    RunFade();
 }
 
 #define cursor data[0]

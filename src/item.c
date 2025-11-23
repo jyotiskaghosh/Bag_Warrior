@@ -84,7 +84,6 @@ static void CB_HandleBag(void) {
     DrawBag();
     RunTextPrinters();
     RunTasks();
-    RunFade();
 }
 
 static void DrawBag(void) {

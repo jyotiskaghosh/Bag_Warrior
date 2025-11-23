@@ -27,9 +27,6 @@ void CB_InitVictoryScreen(void) {
     StopAllTextPrinters();
     gMainCallback = CB_HandleVictoryScreen;
     CreateTask(Task_VictoryScreenSelection, 0);
-
-    // run fade for this frame
-    RunFade();
 }
 
 static void Task_VictoryScreenSelection(int taskId) {
@@ -42,7 +39,6 @@ static void Task_VictoryScreenSelection(int taskId) {
 static void CB_HandleVictoryScreen(void) {
     DrawVictoryScreen();
     RunTasks();
-    RunFade();
 }
 
 static void Task_FadeToStartScreen(int taskId) {

@@ -6,8 +6,10 @@
 #include "core/text.h"
 #include "core/sprite.h"
 #include "core/fade.h"
+#include "core/music.h"
 #include "constants/items.h"
 #include "constants/textures.h"
+#include "constants/audio.h"
 #include "data.h"
 #include <raylib.h>
 #include <stdlib.h>
@@ -667,8 +669,7 @@ void CB_NewLevel(void) {
 
     CreateSprite(&sPlayerTemplate, gTextures[TEX_PLAYER], PLAYER_BOUNDS, 0);
 
-    // run fade for this frame
-    RunFade();
+    PlayMusic(gMusic[MUSIC_DUNGEON]);
 }
 
 void CB_LoadDungeon(void) {
@@ -681,8 +682,7 @@ void CB_LoadDungeon(void) {
 
     CreateSprite(&sPlayerTemplate, gTextures[TEX_PLAYER], PLAYER_BOUNDS, 0);
 
-    // run fade for this frame
-    RunFade();
+    PlayMusic(gMusic[MUSIC_DUNGEON]);
 }
 
 static void CB_HandleDungeon(void) {
@@ -690,5 +690,4 @@ static void CB_HandleDungeon(void) {
     AnimateSprites();
     RunTextPrinters();
     RunTasks();
-    RunFade();
 }

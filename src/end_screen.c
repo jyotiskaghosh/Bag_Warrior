@@ -19,9 +19,6 @@ static void DrawEndScreen(void) {
 void CB_InitEndScreen(void) {
     gMainCallback = CB_HandleEndScreen;
     CreateTask(Task_EndScreenSelection, 0);
-
-    // run fade for this frame
-    RunFade();
 }
 
 static void Task_EndScreenSelection(int taskId) {
@@ -34,7 +31,6 @@ static void Task_EndScreenSelection(int taskId) {
 static void CB_HandleEndScreen(void) {
     DrawEndScreen();
     RunTasks();
-    RunFade();
 }
 
 static void Task_FadeToStartScreen(int taskId) {

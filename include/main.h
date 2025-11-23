@@ -12,3 +12,4 @@
 
 extern void (*gMainCallback)(void);
 extern Texture2D gTextures[];
+extern Music gMusic[];
