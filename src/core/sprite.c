@@ -231,4 +231,10 @@ static void JumpToTopOfAnimLoop(Sprite *sprite) {
     }
 }
 
+void StartSpriteAnim(struct Sprite *sprite, int animNum) {
+    sprite->animNum = animNum;
+    sprite->animBeginning = true;
+    sprite->animEnded = false;
+}
+
 void DummySpriteCallback(Sprite *s) {}

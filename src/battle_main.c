@@ -40,14 +40,58 @@ BattlePlayer gBattlePlayer;
 BattleMonster gBattleOpponent;
 int sMonsterSpriteId;
 
+#define SPRITE_SIZE 64
+
 static const AnimCmd sMonsterAnim[] = {
     ANIMCMD_FRAME(0, 0, 8),
     ANIMCMD_JUMP(0),
 };
 
+static const AnimCmd s4FrameAttackAnim[] = {
+    ANIMCMD_FRAME(0, 0, 8),
+    ANIMCMD_FRAME(SPRITE_SIZE, 0, 8),
+    ANIMCMD_FRAME(SPRITE_SIZE * 2, 0, 8),
+    ANIMCMD_FRAME(SPRITE_SIZE * 3, 0, 8),
+    ANIMCMD_END
+};
+
+static const AnimCmd s5FrameAttackAnim[] = {
+    ANIMCMD_FRAME(0, 0, 8),
+    ANIMCMD_FRAME(SPRITE_SIZE, 0, 8),
+    ANIMCMD_FRAME(SPRITE_SIZE * 2, 0, 8),
+    ANIMCMD_FRAME(SPRITE_SIZE * 3, 0, 8),
+    ANIMCMD_FRAME(SPRITE_SIZE * 4, 0, 8),
+    ANIMCMD_END
+};
+
+static const AnimCmd s11FrameAttackAnim[] = {
+    ANIMCMD_FRAME(0, 0, 8),
+    ANIMCMD_FRAME(SPRITE_SIZE, 0, 8),
+    ANIMCMD_FRAME(SPRITE_SIZE * 2, 0, 8),
+    ANIMCMD_FRAME(SPRITE_SIZE * 3, 0, 8),
+    ANIMCMD_FRAME(SPRITE_SIZE * 4, 0, 8),
+    ANIMCMD_FRAME(SPRITE_SIZE * 5, 0, 8),
+    ANIMCMD_FRAME(SPRITE_SIZE * 6, 0, 8),
+    ANIMCMD_FRAME(SPRITE_SIZE * 7, 0, 8),
+    ANIMCMD_FRAME(SPRITE_SIZE * 8, 0, 8),
+    ANIMCMD_FRAME(SPRITE_SIZE * 9, 0, 8),
+    ANIMCMD_FRAME(SPRITE_SIZE * 10, 0, 8),
+    ANIMCMD_END
+};
+
 static const AnimCmd *const sMonsterAnims[] = {
     sMonsterAnim,
+    s4FrameAttackAnim,
+    s5FrameAttackAnim,
+    s11FrameAttackAnim,
 };
+
+static void MonsterAttackSpriteCB(Sprite *s) {
+    if (s->animEnded) {
+        StartSpriteAnim(s, 0);
+        s->callback = DummySpriteCallback;
+    }
+} 
 
 static void MonsterDefeatSpriteCB(Sprite *s) {
     s->bounds.y += 4;
@@ -240,6 +284,27 @@ static void Task_OpponentPlaysMove(int taskId) {
     gTasks[taskId].func = Task_PlayMove;
     gTasks[taskId].data[1] = OPPONENT;
     gTasks[taskId].data[2] = gBattleOpponent.info->move;
+    
+    int anim = 0;
+    switch (gBattleOpponent.info->textureId) {
+    case TEX_AIR_MAGE:
+    case TEX_EARTH_MAGE:
+    case TEX_FIRE_MAGE:
+    case TEX_WATER_MAGE:
+        anim = 1;
+        break;
+    case TEX_BAT:
+    case TEX_WOLF:
+        anim = 2;
+        break;
+    case TEX_DRAGON:
+        anim = 3;
+        break;
+    }
+
+    StartSpriteAnim(&gSprites[sMonsterSpriteId], anim);
+    
+    gSprites[sMonsterSpriteId].callback = MonsterAttackSpriteCB;
 }
 
 static void Recover(int user, int HP) {
