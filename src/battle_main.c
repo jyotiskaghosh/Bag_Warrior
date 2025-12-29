@@ -41,41 +41,42 @@ BattleMonster gBattleOpponent;
 int sMonsterSpriteId;
 
 #define SPRITE_SIZE 64
+#define FRAME_DURATION 10
 
 static const AnimCmd sMonsterAnim[] = {
-    ANIMCMD_FRAME(0, 0, 8),
+    ANIMCMD_FRAME(0, 0, FRAME_DURATION),
     ANIMCMD_JUMP(0),
 };
 
 static const AnimCmd s4FrameAttackAnim[] = {
-    ANIMCMD_FRAME(0, 0, 8),
-    ANIMCMD_FRAME(SPRITE_SIZE, 0, 8),
-    ANIMCMD_FRAME(SPRITE_SIZE * 2, 0, 8),
-    ANIMCMD_FRAME(SPRITE_SIZE * 3, 0, 8),
+    ANIMCMD_FRAME(0, 0, FRAME_DURATION),
+    ANIMCMD_FRAME(SPRITE_SIZE, 0, FRAME_DURATION),
+    ANIMCMD_FRAME(SPRITE_SIZE * 2, 0, FRAME_DURATION),
+    ANIMCMD_FRAME(SPRITE_SIZE * 3, 0, FRAME_DURATION),
     ANIMCMD_END
 };
 
 static const AnimCmd s5FrameAttackAnim[] = {
-    ANIMCMD_FRAME(0, 0, 8),
-    ANIMCMD_FRAME(SPRITE_SIZE, 0, 8),
-    ANIMCMD_FRAME(SPRITE_SIZE * 2, 0, 8),
-    ANIMCMD_FRAME(SPRITE_SIZE * 3, 0, 8),
-    ANIMCMD_FRAME(SPRITE_SIZE * 4, 0, 8),
+    ANIMCMD_FRAME(0, 0, FRAME_DURATION),
+    ANIMCMD_FRAME(SPRITE_SIZE, 0, FRAME_DURATION),
+    ANIMCMD_FRAME(SPRITE_SIZE * 2, 0, FRAME_DURATION),
+    ANIMCMD_FRAME(SPRITE_SIZE * 3, 0, FRAME_DURATION),
+    ANIMCMD_FRAME(SPRITE_SIZE * 4, 0, FRAME_DURATION),
     ANIMCMD_END
 };
 
 static const AnimCmd s11FrameAttackAnim[] = {
-    ANIMCMD_FRAME(0, 0, 8),
-    ANIMCMD_FRAME(SPRITE_SIZE, 0, 8),
-    ANIMCMD_FRAME(SPRITE_SIZE * 2, 0, 8),
-    ANIMCMD_FRAME(SPRITE_SIZE * 3, 0, 8),
-    ANIMCMD_FRAME(SPRITE_SIZE * 4, 0, 8),
-    ANIMCMD_FRAME(SPRITE_SIZE * 5, 0, 8),
-    ANIMCMD_FRAME(SPRITE_SIZE * 6, 0, 8),
-    ANIMCMD_FRAME(SPRITE_SIZE * 7, 0, 8),
-    ANIMCMD_FRAME(SPRITE_SIZE * 8, 0, 8),
-    ANIMCMD_FRAME(SPRITE_SIZE * 9, 0, 8),
-    ANIMCMD_FRAME(SPRITE_SIZE * 10, 0, 8),
+    ANIMCMD_FRAME(0, 0, FRAME_DURATION),
+    ANIMCMD_FRAME(SPRITE_SIZE, 0, FRAME_DURATION),
+    ANIMCMD_FRAME(SPRITE_SIZE * 2, 0, FRAME_DURATION),
+    ANIMCMD_FRAME(SPRITE_SIZE * 3, 0, FRAME_DURATION),
+    ANIMCMD_FRAME(SPRITE_SIZE * 4, 0, FRAME_DURATION),
+    ANIMCMD_FRAME(SPRITE_SIZE * 5, 0, FRAME_DURATION),
+    ANIMCMD_FRAME(SPRITE_SIZE * 6, 0, FRAME_DURATION),
+    ANIMCMD_FRAME(SPRITE_SIZE * 7, 0, FRAME_DURATION),
+    ANIMCMD_FRAME(SPRITE_SIZE * 8, 0, FRAME_DURATION),
+    ANIMCMD_FRAME(SPRITE_SIZE * 9, 0, FRAME_DURATION),
+    ANIMCMD_FRAME(SPRITE_SIZE * 10, 0, FRAME_DURATION),
     ANIMCMD_END
 };
 
@@ -86,12 +87,15 @@ static const AnimCmd *const sMonsterAnims[] = {
     s11FrameAttackAnim,
 };
 
-static void MonsterAttackSpriteCB(Sprite *s) {
-    if (s->animEnded) {
+static void MonsterAttackSpriteCB(struct Sprite *s) {
+    const AnimCmd *const *anims = s->anims;
+    const AnimCmd *cur = anims[s->animNum];
+
+    if (cur[s->animCmdIndex + 1].type == -1 && s->animDelayCounter == 1) {
         StartSpriteAnim(s, 0);
         s->callback = DummySpriteCallback;
     }
-} 
+}
 
 static void MonsterDefeatSpriteCB(Sprite *s) {
     s->bounds.y += 4;

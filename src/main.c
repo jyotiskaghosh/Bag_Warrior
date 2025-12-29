@@ -80,8 +80,8 @@ static void LoadResources(void) {
 	// *************** Audio *****************
 
 	// music
-	gMusic[MUSIC_DUNGEON] = LoadMusicStream("audio/WATCH OUT.mp3");
-	gMusic[MUSIC_BATTLE] = LoadMusicStream("audio/647908__sonically_sound__short-loop-made-in-a-few-minutes-with-qws-and-goldwave.wav");
+	gMusic[MUSIC_BATTLE] = LoadMusicStream("audio/WATCH OUT.mp3");
+	gMusic[MUSIC_DUNGEON] = LoadMusicStream("audio/cave diving.mp3");
 
 	// sounds
 	gSounds[SOUND_CHEST_OPEN] = LoadSound("audio/771164__steprock__treasure-chest-open.mp3");
