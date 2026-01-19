@@ -11,5 +11,6 @@ enum {
     TEX_DUNGEON_TILESET,
     TEX_PLAYER,
     TEX_CURSOR,
+    TEX_BACKGROUND,
     TEX_COUNT
 };

@@ -80,19 +80,85 @@ static const AnimCmd s11FrameAttackAnim[] = {
     ANIMCMD_END
 };
 
+static const AnimCmd s5FrameIdleAnim[] = {
+    ANIMCMD_FRAME(0, 0, FRAME_DURATION),
+    ANIMCMD_FRAME(0, SPRITE_SIZE, FRAME_DURATION),
+    ANIMCMD_FRAME(0, SPRITE_SIZE * 2, FRAME_DURATION),
+    ANIMCMD_FRAME(0, SPRITE_SIZE * 3, FRAME_DURATION),
+    ANIMCMD_FRAME(0, SPRITE_SIZE * 4, FRAME_DURATION),
+    ANIMCMD_JUMP(0),
+};
+
+static const AnimCmd s9FrameIdleAnim[] = {
+    ANIMCMD_FRAME(0, 0, FRAME_DURATION),
+    ANIMCMD_FRAME(0, SPRITE_SIZE, FRAME_DURATION),
+    ANIMCMD_FRAME(0, SPRITE_SIZE * 2, FRAME_DURATION),
+    ANIMCMD_FRAME(0, SPRITE_SIZE * 3, FRAME_DURATION),
+    ANIMCMD_FRAME(0, SPRITE_SIZE * 4, FRAME_DURATION),
+    ANIMCMD_FRAME(0, SPRITE_SIZE * 5, FRAME_DURATION),
+    ANIMCMD_FRAME(0, SPRITE_SIZE * 6, FRAME_DURATION),
+    ANIMCMD_FRAME(0, SPRITE_SIZE * 7, FRAME_DURATION),
+    ANIMCMD_FRAME(0, SPRITE_SIZE * 8, FRAME_DURATION),
+    ANIMCMD_JUMP(0),
+};
+
+static const AnimCmd s4FrameIdleAnim[] = {
+    ANIMCMD_FRAME(0, 0, FRAME_DURATION),
+    ANIMCMD_FRAME(0, SPRITE_SIZE, FRAME_DURATION),
+    ANIMCMD_FRAME(0, SPRITE_SIZE * 2, FRAME_DURATION),
+    ANIMCMD_FRAME(0, SPRITE_SIZE * 3, FRAME_DURATION),
+    ANIMCMD_JUMP(0),
+};
+
+static const AnimCmd s6FrameIdleAnim[] = {
+    ANIMCMD_FRAME(0, 0, FRAME_DURATION),
+    ANIMCMD_FRAME(0, SPRITE_SIZE, FRAME_DURATION),
+    ANIMCMD_FRAME(0, SPRITE_SIZE * 2, FRAME_DURATION),
+    ANIMCMD_FRAME(0, SPRITE_SIZE * 3, FRAME_DURATION),
+    ANIMCMD_FRAME(0, SPRITE_SIZE * 4, FRAME_DURATION),
+    ANIMCMD_FRAME(0, SPRITE_SIZE * 5, FRAME_DURATION),
+    ANIMCMD_JUMP(0),
+};
+
 static const AnimCmd *const sMonsterAnims[] = {
     sMonsterAnim,
     s4FrameAttackAnim,
     s5FrameAttackAnim,
     s11FrameAttackAnim,
+    s5FrameIdleAnim,
+    s9FrameIdleAnim,
+    s4FrameIdleAnim,
+    s6FrameIdleAnim,
 };
 
-static void MonsterAttackSpriteCB(struct Sprite *s) {
+static void StartIdleAnim(Sprite *s) {
+    int anim = 0;
+    switch (gBattleOpponent.info->textureId) {
+    case TEX_WOLF:
+        anim = 4;
+        break;
+    case TEX_BAT:
+        anim = 5;
+        break;
+    case TEX_AIR_MAGE:
+    case TEX_EARTH_MAGE:
+    case TEX_FIRE_MAGE:
+    case TEX_WATER_MAGE:
+        anim = 6;
+        break;
+    case TEX_DRAGON:
+        anim = 7;
+        break;
+    }
+    StartSpriteAnim(s, anim);
+}
+
+static void MonsterAttackSpriteCB(Sprite *s) {
     const AnimCmd *const *anims = s->anims;
     const AnimCmd *cur = anims[s->animNum];
 
     if (cur[s->animCmdIndex + 1].type == -1 && s->animDelayCounter == 1) {
-        StartSpriteAnim(s, 0);
+        StartIdleAnim(s);
         s->callback = DummySpriteCallback;
     }
 }
@@ -108,6 +174,25 @@ static const SpriteTemplate sMonsterTemplate = {
     .width = 64,
     .height = 64,
     .anims = sMonsterAnims,
+    .callback = DummySpriteCallback,
+};
+
+static const AnimCmd sBackgroundAnim[] = {
+    ANIMCMD_FRAME(0, 0, FRAME_DURATION),
+    ANIMCMD_FRAME(VIRTUAL_WIDTH, 0, FRAME_DURATION),
+    ANIMCMD_FRAME(2 * VIRTUAL_WIDTH, 0, FRAME_DURATION),
+    ANIMCMD_FRAME(3 * VIRTUAL_WIDTH, 0, FRAME_DURATION),
+    ANIMCMD_JUMP(0),
+};
+
+static const AnimCmd *const sBackgroundAnims[] = {
+    sBackgroundAnim,
+};
+
+static const SpriteTemplate sBackgroundTemplate = {
+    .width = VIRTUAL_WIDTH,
+    .height = VIRTUAL_HEIGHT,
+    .anims = sBackgroundAnims,
     .callback = DummySpriteCallback,
 };
 
@@ -170,7 +255,11 @@ void CB_InitBattle(void) {
     };
 
     CreateTask(Task_EncounterText, 0);
+
+    CreateSprite(&sBackgroundTemplate, gTextures[TEX_BACKGROUND], (Rectangle){VIRTUAL_WIDTH / 2, VIRTUAL_HEIGHT / 2, VIRTUAL_WIDTH, VIRTUAL_HEIGHT}, -1);
+
     sMonsterSpriteId = CreateSprite(&sMonsterTemplate, gTextures[gMonstersInfo[monster].textureId], MONSTER_SPRITE_BOX, 0);
+    StartIdleAnim(&gSprites[sMonsterSpriteId]);
 
     gMainCallback = CB_HandleBattle;
 
@@ -178,8 +267,8 @@ void CB_InitBattle(void) {
 }
 
 void CB_HandleBattle(void) {
-    DrawBattleInterface();
     AnimateSprites();
+    DrawBattleInterface();
     RunTextPrinters();
     RunTasks();
 }
@@ -291,13 +380,13 @@ static void Task_OpponentPlaysMove(int taskId) {
     
     int anim = 0;
     switch (gBattleOpponent.info->textureId) {
+    case TEX_BAT:
+        anim = 1;
+        break;
     case TEX_AIR_MAGE:
     case TEX_EARTH_MAGE:
     case TEX_FIRE_MAGE:
     case TEX_WATER_MAGE:
-        anim = 1;
-        break;
-    case TEX_BAT:
     case TEX_WOLF:
         anim = 2;
         break;

@@ -74,8 +74,11 @@ static void LoadResources(void) {
 	// player
 	gTextures[TEX_PLAYER] = LoadTexture("graphics/Player.png");
 
-	//cursor
+	// cursor
 	gTextures[TEX_CURSOR] = LoadTexture("graphics/Cursor.png");
+
+	// battle background
+	gTextures[TEX_BACKGROUND] = LoadTexture("graphics/DungeonBackground.png");
 
 	// *************** Audio *****************
 
