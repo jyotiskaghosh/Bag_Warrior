@@ -308,11 +308,12 @@ static void DrawBattleInterface(void) {
 static void Task_EncounterText(int taskId) {
     char buffer[32];
 
-    switch (gTasks[taskId].state) {
+    int *data = gTasks[taskId].data;
+    switch (state) {
     case 0:
         sprintf(buffer, "A %s appeared!", gBattleOpponent.info->name);
         AddTextPrinterDefault(buffer, BATTLE_TEXT_BOX, 4);
-        gTasks[taskId].state++;
+        state++;
         break;
     case 1:
         if (IsKeyPressed(KEY_Z) || IsKeyPressed(KEY_X)) {
@@ -339,10 +340,11 @@ static void Task_StartBattle(int taskId) {
 #define cursor data[1]
 
 void Task_ActionSelection(int taskId) {
-    switch (gTasks[taskId].state) {
+    int *data = gTasks[taskId].data;
+    switch (state) {
     case 0:
         AddTextPrinterDefault("ITEM\nFLEE", BATTLE_TEXT_BOX, 0);
-        gTasks[taskId].state++;
+        state++;
         break;
     case 1:
         if (IsKeyPressed(KEY_X)) {
@@ -436,7 +438,7 @@ void Task_PlayMove(int taskId) {
             strcpy(userText, gBattleOpponent.info->name);                                           \
         sprintf(buffer, "%s used %s\nIt missed", userText, gMovesInfo[gTasks[taskId].move].name);   \
         AddTextPrinterDefault(buffer, BATTLE_TEXT_BOX, 4);                                          \
-        gTasks[taskId].state = 2;                                                                   \
+        state = 2;                                                                   \
         break;                                                                                      \
     }                
 
@@ -449,7 +451,8 @@ void Task_PlayMove(int taskId) {
     char buffer[64];
     char userText[16];
 
-    switch (gTasks[taskId].state)
+    int *data = gTasks[taskId].data;
+    switch (state)
     {
     case 0:
         switch (gMovesInfo[gTasks[taskId].move].effect) {
@@ -470,7 +473,7 @@ void Task_PlayMove(int taskId) {
 
             sprintf(buffer, "%s used %s", userText, gMovesInfo[gTasks[taskId].move].name);
             AddTextPrinterDefault(buffer, BATTLE_TEXT_BOX, 4);
-            gTasks[taskId].state++;
+            state++;
             break;
         case EFFECT_HEAL:
             Recover(gTasks[taskId].user, -gMovesInfo[gTasks[taskId].move].damage);
@@ -481,7 +484,7 @@ void Task_PlayMove(int taskId) {
 
             sprintf(buffer, "%s used %s\nRecovered health", userText, gMovesInfo[gTasks[taskId].move].name);
             AddTextPrinterDefault(buffer, BATTLE_TEXT_BOX, 4);
-            gTasks[taskId].state++;
+            state++;
             break;
         case EFFECT_ABSORB:
             AccuracyCheck()
@@ -504,7 +507,7 @@ void Task_PlayMove(int taskId) {
 
             sprintf(buffer, "%s used %s\nAbsorbed health", userText, gMovesInfo[gTasks[taskId].move].name);
             AddTextPrinterDefault(buffer, BATTLE_TEXT_BOX, 4);
-            gTasks[taskId].state++;
+            state++;
             break;
         }
         break;
@@ -548,12 +551,13 @@ void Task_PlayMove(int taskId) {
 static void Task_Victory(int taskId) {
     char buffer[32];    
 
-    switch (gTasks[taskId].state) {
+    int *data = gTasks[taskId].data;
+    switch (state) {
     case 0:
         sprintf(buffer, "%s defeated %s", PLAYER_TEXT, gBattleOpponent.info->name);
         AddTextPrinterDefault(buffer, BATTLE_TEXT_BOX, 4);
         gSprites[sMonsterSpriteId].callback = MonsterDefeatSpriteCB;
-        gTasks[taskId].state++;
+        state++;
         gInBattle = false;
         break;
     case 1:
@@ -571,12 +575,13 @@ static void Task_Victory(int taskId) {
 static void Task_VictoryReward(int taskId) {
     char buffer[32];    
 
-    switch (gTasks[taskId].state) {
+    int *data = gTasks[taskId].data;
+    switch (state) {
     case 0:
         AddItem(gBattleOpponent.info->item);
         sprintf(buffer, "%s got a %s", PLAYER_TEXT, gItemsInfo[gBattleOpponent.info->item].name);
         AddTextPrinterDefault(buffer, BATTLE_TEXT_BOX, 4);
-        gTasks[taskId].state++;
+        state++;
         break;
     case 1:
         if (IsKeyPressed(KEY_Z) || IsKeyPressed(KEY_X)) {
@@ -590,11 +595,12 @@ static void Task_VictoryReward(int taskId) {
 static void Task_Defeat(int taskId) {
     char buffer[24];
 
-    switch (gTasks[taskId].state) {
+    int *data = gTasks[taskId].data;
+    switch (state) {
     case 0:
         sprintf(buffer, "%s were defeated", PLAYER_TEXT);
         AddTextPrinterDefault(buffer, BATTLE_TEXT_BOX, 4);
-        gTasks[taskId].state++;
+        state++;
         gInBattle = false;
         break;
     case 1:
@@ -609,16 +615,17 @@ static void Task_Defeat(int taskId) {
 static void Task_Flee(int taskId) {
     char buffer[16];
 
-    switch (gTasks[taskId].state) {
+    int *data = gTasks[taskId].data;
+    switch (state) {
     case 0:
         if (GetRandomValue(1, gBattlePlayer.speed + gBattleOpponent.info->speed) <= gBattlePlayer.speed) {
             sprintf(buffer, "%s ran away", PLAYER_TEXT);
             AddTextPrinterDefault(buffer, BATTLE_TEXT_BOX, 4);
-            gTasks[taskId].state++;
+            state++;
             gInBattle = false;
         } else {
             AddTextPrinterDefault("Failed to run away", BATTLE_TEXT_BOX, 4);
-            gTasks[taskId].state = 2;
+            state = 2;
         }
         break;
     case 1:

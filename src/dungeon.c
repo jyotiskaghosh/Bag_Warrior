@@ -594,7 +594,8 @@ static void Task_OpenChest(int taskId) {
     int gold = 0;
     int item = 0;
 
-    switch (gTasks[taskId].state) {
+    int *data = gTasks[taskId].data;
+    switch (state) {
     case 0:
         sIsFieldControlLocked = true;
 
@@ -610,7 +611,7 @@ static void Task_OpenChest(int taskId) {
 
         PlaySound(gSounds[SOUND_CHEST_OPEN]);
 
-        gTasks[taskId].state++;
+        state++;
         break;
     case 1:
         if (IsKeyPressed(KEY_Z) || IsKeyPressed(KEY_X)) {
@@ -629,7 +630,8 @@ static void Task_PickCoins(int taskId) {
     char buffer[32];
     int gold = 0;
 
-    switch (gTasks[taskId].state) {
+    int *data = gTasks[taskId].data;
+    switch (state) {
     case 0:
         sIsFieldControlLocked = true;
 
@@ -641,7 +643,7 @@ static void Task_PickCoins(int taskId) {
 
         PlaySound(gSounds[SOUND_COINS]);
 
-        gTasks[taskId].state++;
+        state++;
         break;
     case 1:
         if (IsKeyPressed(KEY_Z) || IsKeyPressed(KEY_X)) {
