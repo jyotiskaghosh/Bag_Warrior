@@ -104,7 +104,6 @@ static Camera2D sCamera;
 static bool sIsFieldControlLocked;
 static bool sInDungeon;
 
-// Fill map with walls
 static void ClearMap(void) {
     for (int y = 0; y < MAP_H; y++)
         for (int x = 0; x < MAP_W; x++) {
@@ -127,7 +126,7 @@ static void GenerateRooms(void) {
         sRooms[RandomRoom()].exists = false;
 
     for (int i = 0; i < MAX_ROOMS; i++) {
-        int cellX = (i % 3) * cellW + 1;
+        int cellX = (i % 3) * cellW;
         int cellY = (i / 3) * cellH;
 
         if (!sRooms[i].exists) {
@@ -293,7 +292,7 @@ static void ConnectRooms(int r1, int r2) {
             epos.x = rpt->x + GetRandomValue(0, rpt->w - 3) + 1;
         }
 
-        distance = abs(spos.y - epos.y) - 1; // distance to move
+        distance = abs(spos.y - epos.y); // distance to move
         turn_delta.y = 0; // direction to turn
         turn_delta.x = (spos.x < epos.x ? 1 : -1);
         turn_distance = abs(spos.x - epos.x); // how far to turn
@@ -316,7 +315,7 @@ static void ConnectRooms(int r1, int r2) {
             epos.y = rpt->y + GetRandomValue(0, rpt->h - 3) + 1;
         }
 
-        distance = abs(spos.x - epos.x) - 1;
+        distance = abs(spos.x - epos.x);
         turn_delta.y = (spos.y < epos.y ? 1 : -1);
         turn_delta.x = 0;
         turn_distance = abs(spos.y - epos.y);
@@ -324,8 +323,8 @@ static void ConnectRooms(int r1, int r2) {
 
     turn_spot = GetRandomValue(0, distance - 2) + 1; // where turn starts
 
-    sMap.layer1[spos.y][spos.x] = TILE_FLOOR;
-    sMap.layer1[epos.y][epos.x] = TILE_FLOOR;
+    //sMap.layer1[spos.y][spos.x] = TILE_FLOOR;
+    //sMap.layer1[epos.y][epos.x] = TILE_FLOOR;
 
     // get ready to move...
     curr.x = spos.x;

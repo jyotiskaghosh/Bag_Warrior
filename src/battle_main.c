@@ -438,7 +438,7 @@ void Task_PlayMove(int taskId) {
             strcpy(userText, gBattleOpponent.info->name);                                           \
         sprintf(buffer, "%s used %s\nIt missed", userText, gMovesInfo[gTasks[taskId].move].name);   \
         AddTextPrinterDefault(buffer, BATTLE_TEXT_BOX, 4);                                          \
-        state = 2;                                                                   \
+        state = 2;                                                                                  \
         break;                                                                                      \
     }                
 

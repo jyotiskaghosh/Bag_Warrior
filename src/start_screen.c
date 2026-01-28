@@ -73,6 +73,7 @@ static void Task_StartScreenSelection(int taskId) {
         PlaySound(gSounds[SOUND_SELECT]);
 
         DestroyTask(taskId);
+
         switch (sCursor) {
         case NEW_GAME:
             CreateTask(Task_NewGame, 0);

@@ -10,9 +10,11 @@
 
 #define PROGRAMMER_TEXT "Programmer:"
 #define ARTIST_TEXT "Artist:"
+#define MUSICIAN_TEXT "Musician:"
 
 #define PROGRAMMER_NAME "Jyotiska Ghosh"
 #define ARTIST_NAME "Adam Missi (Estilik04)"
+#define MUSIC_NAME "StixDevs"
 
 static void CB_HandleCreditScreen(void);
 static void Task_CreditScreenSelection(int taskId);
@@ -25,6 +27,9 @@ static void DrawEndScreen(void) {
 
     DrawText(ARTIST_TEXT, VIRTUAL_WIDTH / 16, VIRTUAL_HEIGHT / 2 + 8, 16, WHITE);
     DrawText(ARTIST_NAME, 15 * VIRTUAL_WIDTH / 16 - MeasureText(ARTIST_NAME, 16), VIRTUAL_HEIGHT / 2 + 8, 16, WHITE);
+
+    DrawText(MUSICIAN_TEXT, VIRTUAL_WIDTH / 16, VIRTUAL_HEIGHT / 2 + 24, 16, WHITE);
+    DrawText(MUSIC_NAME, 15 * VIRTUAL_WIDTH / 16 - MeasureText(MUSIC_NAME, 16), VIRTUAL_HEIGHT / 2 + 24, 16, WHITE);
 } 
 
 void CB_InitCreditScreen(void) {

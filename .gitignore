@@ -1,12 +1,14 @@
-    # Compiled object files
-    *.o
+# Compiled object files
+*.o
 
-    # Executable files
-    *.out
-    *.exe
+# Executable files
+*.out
+*.exe
 
-    # Build directories
-    /build/
+# Build directories
+/build/
 
-    # IDE-specific files (e.g., VS Code)
-    .vscode/
+# IDE-specific files (e.g., VS Code)
+.vscode/
+
+game
