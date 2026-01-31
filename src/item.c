@@ -178,11 +178,13 @@ static void Task_ItemConfirmation(int taskId) {
             Item item = gItemsInfo[gBag[sItemSelectionCursor + sPage * ITEMS_PER_PAGE]];
 
             switch (item.effect) {
-            case ITEM_EFFECT_HEAL:
-                gBattlePlayer.HP -= gMovesInfo[item.move].damage;
+            case ITEM_EFFECT_HEAL: {
+                int heal = -gMovesInfo[item.move].damage; // damage for MOVE_HEAL is negative
+                gBattlePlayer.HP += heal;
                 if (gBattlePlayer.HP > gBattlePlayer.maxHP)
                     gBattlePlayer.HP = gBattlePlayer.maxHP;
                 break;
+            }
             case ITEM_EFFECT_ESCAPE:
                 DestroyTask(taskId);
                 CreateTask(Task_FadeToVictoryScreen, 0);

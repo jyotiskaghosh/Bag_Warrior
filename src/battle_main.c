@@ -19,8 +19,11 @@
 #include <stdio.h>
 #include <string.h>
 
+#define SPRITE_SIZE 64
+#define FRAME_DURATION 10
+
 #define BATTLE_TEXT_BOX (Rectangle){60, VIRTUAL_HEIGHT * 3/4, 200, VIRTUAL_HEIGHT * 1/4}
-#define MONSTER_SPRITE_BOX (Rectangle){VIRTUAL_WIDTH / 2, VIRTUAL_HEIGHT / 2, 64, 64}
+#define MONSTER_SPRITE_BOX (Rectangle){VIRTUAL_WIDTH / 2, VIRTUAL_HEIGHT / 2, SPRITE_SIZE, SPRITE_SIZE}
 #define state data[0]
 #define PLAYER_TEXT "YOU"
 
@@ -40,95 +43,47 @@ BattlePlayer gBattlePlayer;
 BattleMonster gBattleOpponent;
 int sMonsterSpriteId;
 
-#define SPRITE_SIZE 64
-#define FRAME_DURATION 10
+/* Helper macros to reduce repetition when declaring AnimCmd arrays */
+#define ANIM_H(n) ANIMCMD_FRAME((SPRITE_SIZE) * (n), 0, FRAME_DURATION)
+#define ANIM_V(n) ANIMCMD_FRAME(0, (SPRITE_SIZE) * (n), FRAME_DURATION)
 
-static const AnimCmd sMonsterAnim[] = {
-    ANIMCMD_FRAME(0, 0, FRAME_DURATION),
-    ANIMCMD_JUMP(0),
-};
+/* Horizontal sequences */
+#define ANIM_H_1  ANIM_H(0)
+#define ANIM_H_4  ANIM_H(0), ANIM_H(1), ANIM_H(2), ANIM_H(3)
+#define ANIM_H_5  ANIM_H_4, ANIM_H(4)
+#define ANIM_H_11 ANIM_H_5, ANIM_H(5), ANIM_H(6), ANIM_H(7), ANIM_H(8), ANIM_H(9), ANIM_H(10)
+#define ANIM_H_12 ANIM_H_11, ANIM_H(11)
+#define ANIM_H_14 ANIM_H_12, ANIM_H(12), ANIM_H(13)
+#define ANIM_H_15 ANIM_H_14, ANIM_H(14)
+#define ANIM_H_21 ANIM_H_15, ANIM_H(15), ANIM_H(16), ANIM_H(17), ANIM_H(18), ANIM_H(19), ANIM_H(20)
 
-static const AnimCmd s4FrameAttackAnim[] = {
-    ANIMCMD_FRAME(0, 0, FRAME_DURATION),
-    ANIMCMD_FRAME(SPRITE_SIZE, 0, FRAME_DURATION),
-    ANIMCMD_FRAME(SPRITE_SIZE * 2, 0, FRAME_DURATION),
-    ANIMCMD_FRAME(SPRITE_SIZE * 3, 0, FRAME_DURATION),
-    ANIMCMD_END
-};
+/* Vertical sequences */
+#define ANIM_V_4  ANIM_V(0), ANIM_V(1), ANIM_V(2), ANIM_V(3)
+#define ANIM_V_5  ANIM_V_4, ANIM_V(4)
+#define ANIM_V_6  ANIM_V_5, ANIM_V(5)
+#define ANIM_V_9  ANIM_V_6, ANIM_V(6), ANIM_V(7), ANIM_V(8)
 
-static const AnimCmd s5FrameAttackAnim[] = {
-    ANIMCMD_FRAME(0, 0, FRAME_DURATION),
-    ANIMCMD_FRAME(SPRITE_SIZE, 0, FRAME_DURATION),
-    ANIMCMD_FRAME(SPRITE_SIZE * 2, 0, FRAME_DURATION),
-    ANIMCMD_FRAME(SPRITE_SIZE * 3, 0, FRAME_DURATION),
-    ANIMCMD_FRAME(SPRITE_SIZE * 4, 0, FRAME_DURATION),
-    ANIMCMD_END
-};
+/***************** monster sprite template ************************/
 
-static const AnimCmd s11FrameAttackAnim[] = {
-    ANIMCMD_FRAME(0, 0, FRAME_DURATION),
-    ANIMCMD_FRAME(SPRITE_SIZE, 0, FRAME_DURATION),
-    ANIMCMD_FRAME(SPRITE_SIZE * 2, 0, FRAME_DURATION),
-    ANIMCMD_FRAME(SPRITE_SIZE * 3, 0, FRAME_DURATION),
-    ANIMCMD_FRAME(SPRITE_SIZE * 4, 0, FRAME_DURATION),
-    ANIMCMD_FRAME(SPRITE_SIZE * 5, 0, FRAME_DURATION),
-    ANIMCMD_FRAME(SPRITE_SIZE * 6, 0, FRAME_DURATION),
-    ANIMCMD_FRAME(SPRITE_SIZE * 7, 0, FRAME_DURATION),
-    ANIMCMD_FRAME(SPRITE_SIZE * 8, 0, FRAME_DURATION),
-    ANIMCMD_FRAME(SPRITE_SIZE * 9, 0, FRAME_DURATION),
-    ANIMCMD_FRAME(SPRITE_SIZE * 10, 0, FRAME_DURATION),
-    ANIMCMD_END
-};
+static const AnimCmd s1FrameHorizontalAnim[] = { ANIM_H_1, ANIMCMD_END };
+static const AnimCmd s4FrameHorizontalAnim[] = { ANIM_H_4,  ANIMCMD_END };
+static const AnimCmd s5FrameHorizontalAnim[] = { ANIM_H_5,  ANIMCMD_END };
+static const AnimCmd s11FrameHorizontalAnim[] = { ANIM_H_11,  ANIMCMD_END  };
 
-static const AnimCmd s5FrameIdleAnim[] = {
-    ANIMCMD_FRAME(0, 0, FRAME_DURATION),
-    ANIMCMD_FRAME(0, SPRITE_SIZE, FRAME_DURATION),
-    ANIMCMD_FRAME(0, SPRITE_SIZE * 2, FRAME_DURATION),
-    ANIMCMD_FRAME(0, SPRITE_SIZE * 3, FRAME_DURATION),
-    ANIMCMD_FRAME(0, SPRITE_SIZE * 4, FRAME_DURATION),
-    ANIMCMD_JUMP(0),
-};
-
-static const AnimCmd s9FrameIdleAnim[] = {
-    ANIMCMD_FRAME(0, 0, FRAME_DURATION),
-    ANIMCMD_FRAME(0, SPRITE_SIZE, FRAME_DURATION),
-    ANIMCMD_FRAME(0, SPRITE_SIZE * 2, FRAME_DURATION),
-    ANIMCMD_FRAME(0, SPRITE_SIZE * 3, FRAME_DURATION),
-    ANIMCMD_FRAME(0, SPRITE_SIZE * 4, FRAME_DURATION),
-    ANIMCMD_FRAME(0, SPRITE_SIZE * 5, FRAME_DURATION),
-    ANIMCMD_FRAME(0, SPRITE_SIZE * 6, FRAME_DURATION),
-    ANIMCMD_FRAME(0, SPRITE_SIZE * 7, FRAME_DURATION),
-    ANIMCMD_FRAME(0, SPRITE_SIZE * 8, FRAME_DURATION),
-    ANIMCMD_JUMP(0),
-};
-
-static const AnimCmd s4FrameIdleAnim[] = {
-    ANIMCMD_FRAME(0, 0, FRAME_DURATION),
-    ANIMCMD_FRAME(0, SPRITE_SIZE, FRAME_DURATION),
-    ANIMCMD_FRAME(0, SPRITE_SIZE * 2, FRAME_DURATION),
-    ANIMCMD_FRAME(0, SPRITE_SIZE * 3, FRAME_DURATION),
-    ANIMCMD_JUMP(0),
-};
-
-static const AnimCmd s6FrameIdleAnim[] = {
-    ANIMCMD_FRAME(0, 0, FRAME_DURATION),
-    ANIMCMD_FRAME(0, SPRITE_SIZE, FRAME_DURATION),
-    ANIMCMD_FRAME(0, SPRITE_SIZE * 2, FRAME_DURATION),
-    ANIMCMD_FRAME(0, SPRITE_SIZE * 3, FRAME_DURATION),
-    ANIMCMD_FRAME(0, SPRITE_SIZE * 4, FRAME_DURATION),
-    ANIMCMD_FRAME(0, SPRITE_SIZE * 5, FRAME_DURATION),
-    ANIMCMD_JUMP(0),
-};
+static const AnimCmd s5FrameVerticalAnim[] = { ANIM_V_5, ANIMCMD_JUMP(0) };
+static const AnimCmd s9FrameVerticalAnim[] = { ANIM_V_9, ANIMCMD_JUMP(0) };
+static const AnimCmd s4FrameVerticalAnim[] = { ANIM_V_4, ANIMCMD_JUMP(0) };
+static const AnimCmd s6FrameVerticalAnim[] = { ANIM_V_6, ANIMCMD_JUMP(0) };
 
 static const AnimCmd *const sMonsterAnims[] = {
-    sMonsterAnim,
-    s4FrameAttackAnim,
-    s5FrameAttackAnim,
-    s11FrameAttackAnim,
-    s5FrameIdleAnim,
-    s9FrameIdleAnim,
-    s4FrameIdleAnim,
-    s6FrameIdleAnim,
+    s1FrameHorizontalAnim,
+    s4FrameHorizontalAnim,
+    s5FrameHorizontalAnim,
+    s11FrameHorizontalAnim,
+    s5FrameVerticalAnim,
+    s9FrameVerticalAnim,
+    s4FrameVerticalAnim,
+    s6FrameVerticalAnim,
 };
 
 static void StartIdleAnim(Sprite *s) {
@@ -171,11 +126,34 @@ static void MonsterDefeatSpriteCB(Sprite *s) {
 } 
 
 static const SpriteTemplate sMonsterTemplate = {
-    .width = 64,
-    .height = 64,
+    .width = SPRITE_SIZE,
+    .height = SPRITE_SIZE,
     .anims = sMonsterAnims,
     .callback = DummySpriteCallback,
 };
+
+/***************** move sprite template ************************/
+
+static const AnimCmd s12FrameHorizontalAnim[] = { ANIM_H_12, ANIMCMD_END };
+static const AnimCmd s14FrameHorizontalAnim[] = { ANIM_H_14,  ANIMCMD_END };
+static const AnimCmd s15FrameHorizontalAnim[] = { ANIM_H_15,  ANIMCMD_END };
+static const AnimCmd s21FrameHorizontalAnim[] = { ANIM_H_21,  ANIMCMD_END  };
+
+static const AnimCmd *const sMoveAnims[] = {
+    s12FrameHorizontalAnim,
+    s14FrameHorizontalAnim,
+    s15FrameHorizontalAnim,
+    s21FrameHorizontalAnim,
+};
+
+static const SpriteTemplate sMoveTemplate = {
+    .width = SPRITE_SIZE,
+    .height = SPRITE_SIZE,
+    .anims = sMoveAnims,
+    .callback = DummySpriteCallback,
+};
+
+/***************** background sprite template ************************/
 
 static const AnimCmd sBackgroundAnim[] = {
     ANIMCMD_FRAME(0, 0, FRAME_DURATION),
@@ -195,6 +173,8 @@ static const SpriteTemplate sBackgroundTemplate = {
     .anims = sBackgroundAnims,
     .callback = DummySpriteCallback,
 };
+
+
 
 typedef struct {
     int monster;
@@ -466,6 +446,29 @@ void Task_PlayMove(int taskId) {
 
                 Damage(OPPONENT, (int)(gMovesInfo[gTasks[taskId].move].damage * mod));
                 strcpy(userText, PLAYER_TEXT);
+
+                int id = CreateSprite(&sMoveTemplate, gTextures[gMovesInfo[gTasks[taskId].move].textureId], MONSTER_SPRITE_BOX, 1);
+
+                int anim = 0;
+                switch (gTasks[taskId].move)
+                {
+                case MOVE_THROWING_KNIFE:
+                    anim = 0;
+                    break;
+                case MOVE_AIR_SPELL:
+                case MOVE_BOMB:
+                    anim = 1;
+                    break;
+                case MOVE_FIRE_SPELL:
+                case MOVE_WATER_SPELL:
+                    anim = 2;
+                    break;
+                case MOVE_EARTH_SPELL:
+                    anim = 3;
+                    break;
+                }
+
+                StartSpriteAnim(&gSprites[id], anim);
             } else {
                 Damage(PLAYER, gMovesInfo[gTasks[taskId].move].damage);
                 strcpy(userText, gBattleOpponent.info->name);

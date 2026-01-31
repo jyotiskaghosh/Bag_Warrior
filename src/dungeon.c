@@ -64,25 +64,6 @@ enum {
     TILE_SKULL
 };
 
-static const AnimCmd sPlayerAnim[] = {
-    ANIMCMD_FRAME(0, 0, 8),
-    ANIMCMD_FRAME(16, 0, 8),
-    ANIMCMD_FRAME(32, 0, 8),
-    ANIMCMD_FRAME(48, 0, 8),
-    ANIMCMD_JUMP(0),
-};
-
-static const AnimCmd *const sPlayerAnims[] = {
-    sPlayerAnim,
-};
-
-static const SpriteTemplate sPlayerTemplate = {
-    .width = 16,
-    .height = 16,
-    .anims = sPlayerAnims,
-    .callback = DummySpriteCallback,
-};
-
 static void CB_HandleDungeon(void);
 static int RandomRoom(void);
 static Coordinates RandomPos(Room *r);
@@ -103,6 +84,25 @@ static Camera2D sCamera;
 
 static bool sIsFieldControlLocked;
 static bool sInDungeon;
+
+static const AnimCmd sPlayerAnim[] = {
+    ANIMCMD_FRAME(0, 0, 8),
+    ANIMCMD_FRAME(16, 0, 8),
+    ANIMCMD_FRAME(32, 0, 8),
+    ANIMCMD_FRAME(48, 0, 8),
+    ANIMCMD_JUMP(0),
+};
+
+static const AnimCmd *const sPlayerAnims[] = {
+    sPlayerAnim,
+};
+
+static const SpriteTemplate sPlayerTemplate = {
+    .width = 16,
+    .height = 16,
+    .anims = sPlayerAnims,
+    .callback = DummySpriteCallback,
+};
 
 static void ClearMap(void) {
     for (int y = 0; y < MAP_H; y++)
@@ -322,9 +322,6 @@ static void ConnectRooms(int r1, int r2) {
     }
 
     turn_spot = GetRandomValue(0, distance - 2) + 1; // where turn starts
-
-    //sMap.layer1[spos.y][spos.x] = TILE_FLOOR;
-    //sMap.layer1[epos.y][epos.x] = TILE_FLOOR;
 
     // get ready to move...
     curr.x = spos.x;

@@ -67,6 +67,14 @@ static void LoadResources(void) {
 	gTextures[TEX_WATER_MAGE] = LoadTexture("graphics/WaterMage.png");
 	gTextures[TEX_FIRE_MAGE] = LoadTexture("graphics/FireMage.png");
 	gTextures[TEX_DRAGON] = LoadTexture("graphics/Dragon.png");
+	
+	// move textures
+	gTextures[TEX_THROW_KNIFE_MOVE] = LoadTexture("graphics/ThrowKnifeAttack.png");
+	gTextures[TEX_BOMB_MOVE] = LoadTexture("graphics/BombAttack.png");
+	gTextures[TEX_EARTH_SPELL_MOVE] = LoadTexture("graphics/EarthSpellAttack.png");
+	gTextures[TEX_AIR_SPELL_MOVE] = LoadTexture("graphics/AirSpellAttack.png");
+	gTextures[TEX_FIRE_SPELL_MOVE] = LoadTexture("graphics/FireSpellAttack.png");
+	gTextures[TEX_WATER_SPELL_MOVE] = LoadTexture("graphics/WaterSpellAttack.png");
 
 	// dungeon tileset
 	gTextures[TEX_DUNGEON_TILESET] = LoadTexture("graphics/DungeonTileset.png");

@@ -1,5 +1,6 @@
 #include "battle_main.h"
 #include "constants/moves.h"
+#include "constants/textures.h"
 
 const Move gMovesInfo[] = {
     [MOVE_BITE] = {
@@ -19,6 +20,7 @@ const Move gMovesInfo[] = {
         .effect = EFFECT_HIT,
         .damage = 3,
         .accuracy = 100,
+        .textureId = TEX_THROW_KNIFE_MOVE
     },
     [MOVE_HEAL] = {
         .name = "HEAL",
@@ -30,7 +32,8 @@ const Move gMovesInfo[] = {
         .effect = EFFECT_HIT,
         .damage = 5,
         .accuracy = 80,
-        .flags = ELEMENT_FIRE
+        .flags = ELEMENT_FIRE,
+        .textureId = TEX_BOMB_MOVE
     },
     [MOVE_EARTH_SPELL] = {
         .name = "EARTH SPELL",
@@ -38,6 +41,7 @@ const Move gMovesInfo[] = {
         .damage = 4,
         .accuracy = 100,
         .flags = ELEMENT_EARTH,
+        .textureId = TEX_EARTH_SPELL_MOVE
     },
     [MOVE_AIR_SPELL] = {
         .name = "AIR SPELL",
@@ -45,6 +49,7 @@ const Move gMovesInfo[] = {
         .damage = 4,
         .accuracy = 100,
         .flags = ELEMENT_AIR,
+        .textureId = TEX_AIR_SPELL_MOVE
     },
     [MOVE_WATER_SPELL] = {
         .name = "WATER SPELL",
@@ -52,6 +57,7 @@ const Move gMovesInfo[] = {
         .damage = 4,
         .accuracy = 100,
         .flags = ELEMENT_WATER,
+        .textureId = TEX_WATER_SPELL_MOVE
     },
     [MOVE_FIRE_SPELL] = {
         .name = "FIRE SPELL",
@@ -59,6 +65,7 @@ const Move gMovesInfo[] = {
         .damage = 4,
         .accuracy = 100,
         .flags = ELEMENT_FIRE,
+        .textureId = TEX_FIRE_SPELL_MOVE
     },
     [MOVE_DRAGON_FIRE] = {
         .name = "DRAGON FIRE",

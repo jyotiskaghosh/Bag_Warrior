@@ -8,6 +8,7 @@ typedef struct {
     int damage;
     int accuracy;
     int flags;
+    int textureId;
 } Move;
 
 typedef struct {

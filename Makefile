@@ -3,13 +3,16 @@
 # Compiler and flags
 CC = gcc
 CFLAGS = -Wall -Wextra -Iinclude
-LDFLAGS = -lraylib
+# Path to static raylib archive and link flags
+RAYLIB-DESKTOP = $(HOME)/raylib-desktop/libraylib.a
+RAYLIB-WEB = $(HOME)/raylib-web/libraylib.a
+# Link desktop binary with static raylib and math library
+LDFLAGS = $(RAYLIB-DESKTOP) -lm
 
 # Emscripten settings
 EMCC = emcc
 EMCFLAGS = -I$(HOME)/raylib/src -Iinclude -DPLATFORM_WEB
-EMLDFLAGS = -s USE_GLFW=3 -s ASYNCIFY -s FULL_ES3=1 -s ERROR_ON_UNDEFINED_SYMBOLS=0 --preload-file graphics
-RAYLIB = $(HOME)/raylib/src/libraylib.a
+EMLDFLAGS = -s USE_GLFW=3 -s ASYNCIFY -s FULL_ES3=1 -s ERROR_ON_UNDEFINED_SYMBOLS=0 --preload-file graphics -lm
 
 # Directories
 SRC_DIR = src
@@ -50,6 +53,6 @@ $(WASM_OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 
 # WebAssembly build target
 wasm: $(WASM_OBJ)
-	$(EMCC) $(WASM_OBJ) $(RAYLIB) $(EMLDFLAGS) -o game.html
+	$(EMCC) $(WASM_OBJ) $(RAYLIB-WEB) $(EMLDFLAGS) -o game.html
 
 .PHONY: all clean wasm
