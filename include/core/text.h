@@ -36,5 +36,6 @@ int AddTextPrinter(const TextPrinterTemplate *template, int framesPerChar);
 void RunTextPrinters(void);
 void StopTextPrinter(int id);
 void StopAllTextPrinters(void);
+bool IsPrinterActive(int id);
 
-void AddTextPrinterDefault(const char * str, Rectangle box, int framesPerChar);
+int AddTextPrinterDefault(const char * str, Rectangle box, int framesPerChar);

@@ -3,6 +3,7 @@
 enum {
     MUSIC_DUNGEON,
     MUSIC_BATTLE,
+    MUSIC_END,
     MUSIC_COUNT
 };
 

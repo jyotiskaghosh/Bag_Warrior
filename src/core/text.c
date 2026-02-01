@@ -76,7 +76,11 @@ void StopAllTextPrinters(void) {
         sTextPrinters[i].active = false;
 }
 
-void AddTextPrinterDefault(const char * str, Rectangle box, int framesPerChar) {
+bool IsPrinterActive(int id) {
+    return sTextPrinters[id].active;
+}
+
+int AddTextPrinterDefault(const char * str, Rectangle box, int framesPerChar) {
     TextPrinterTemplate template = {
         .box = box,
         .padding = 4,
@@ -91,5 +95,5 @@ void AddTextPrinterDefault(const char * str, Rectangle box, int framesPerChar) {
     strncpy(template.text, str, sizeof(template.text) - 1);
     template.text[sizeof(template.text) - 1] = '\0';
 
-    AddTextPrinter(&template, framesPerChar);
+    return AddTextPrinter(&template, framesPerChar);
 }

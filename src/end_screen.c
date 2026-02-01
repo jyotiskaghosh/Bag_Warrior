@@ -19,6 +19,8 @@ static void DrawEndScreen(void) {
 } 
 
 void CB_InitEndScreen(void) {
+    PlayMusic(gMusic[MUSIC_END]);
+
     gMainCallback = CB_HandleEndScreen;
     CreateTask(Task_EndScreenSelection, 0);
 }
