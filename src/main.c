@@ -94,6 +94,7 @@ static void LoadResources(void) {
 	gMusic[MUSIC_BATTLE] = LoadMusicStream("audio/WATCH OUT.mp3");
 	gMusic[MUSIC_DUNGEON] = LoadMusicStream("audio/cave diving.mp3");
 	gMusic[MUSIC_END] = LoadMusicStream("audio/GAME OVA.mp3");
+	gMusic[MUSIC_VICTORY] = LoadMusicStream("audio/i cant stop winning.mp3");
 
 	// sounds
 	gSounds[SOUND_CHEST_OPEN] = LoadSound("audio/771164__steprock__treasure-chest-open.mp3");

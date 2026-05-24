@@ -26,7 +26,10 @@ static void DrawVictoryScreen(void) {
 } 
 
 void CB_InitVictoryScreen(void) {
+    PlayMusic(gMusic[MUSIC_VICTORY]);
+
     StopAllTextPrinters();
+
     gMainCallback = CB_HandleVictoryScreen;
     CreateTask(Task_VictoryScreenSelection, 0);
 }

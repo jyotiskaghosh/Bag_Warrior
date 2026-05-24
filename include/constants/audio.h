@@ -4,6 +4,7 @@ enum {
     MUSIC_DUNGEON,
     MUSIC_BATTLE,
     MUSIC_END,
+    MUSIC_VICTORY,
     MUSIC_COUNT
 };
 
